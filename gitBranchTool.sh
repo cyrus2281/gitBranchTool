@@ -1,39 +1,23 @@
-# Custom prompt
-autoload -Uz vcs_info
-precmd() { vcs_info }
-zstyle ':vcs_info:git:*' formats '%b'
-setopt PROMPT_SUBST
-getName() {
-  brn=""
-  if [[ -n ${vcs_info_msg_0_} ]]; then
-    name=""
-    cat "$(currentBranchPath)" | while read line || [ -n "$line" ]; do
-      id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-      als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
-      if [[ ${vcs_info_msg_0_} == $id ]]; then
-          name=" ($als)"
-          break
-      fi
-    done
-    brn="%1~ ⌥ ${vcs_info_msg_0_}$name "
-  else
-    brn="$(pwd) "
-  fi
-  echo $brn
-}
-PROMPT='%n ➤ $(getName)❖ '
+__DEFAULT_BRANCH_PATH=~/.branchAliases/.branchAliases
+
+BRANCH_DELIMITER=${BRANCH_DELIMITER:-'|'}
+BRANCH_PATH=${BRANCH_PATH:-"$__DEFAULT_BRANCH_PATH"}
+CUSTOMIZED_GIT_PROMPT=${CUSTOMIZED_GIT_PROMPT:-true}
+DEFAULT_BRANCH=main
 
 # Git Branch Snippets
+mkdir -p ~/.branchAliases/
 
-BRANCH_DELIMITER="|"
-BRANCH_PATH=~/.branchAliases/.branchAliases
+__getBranchName() {
+  echo $(git branch 2> /dev/null | grep \* | cut -d "*" -f2 | cut -d " " -f2)
+}
 
 currentBranchPath(){
-  if [[ -z ${vcs_info_msg_0_} ]]; then
+  if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
-  currentPath="$BRANCH_PATH.${PWD##*/}"
+  currentPath="$BRANCH_PATH.$(basename $(git rev-parse --show-toplevel))"
   if [[ ! -e $currentPath ]]; then
     touch $currentPath
   fi
@@ -41,15 +25,47 @@ currentBranchPath(){
 }
 
 list(){
+  if [[ -z $(__getBranchName) ]]; then
+    echo "-- Not a git repository --"
+    return 1
+  fi
   cat -n $(currentBranchPath) | tr '|' '\t'
+}
+
+currentBranch() {
+  if [[ -z $(__getBranchName) ]]; then
+    echo "-- Not a git repository --"
+    return 1
+  fi
+  cat $(currentBranchPath) | tr '|' '\t' | grep $(__getBranchName)
+  if [ $?  != 0 ]; then
+      echo "master (or unregistered branch)"
+  fi
+}
+
+branchNameFromAlias(){
+  if [[ -z $(__getBranchName) ]]; then
+    echo "-- Not a git repository --"
+    return 1
+  fi
+  cat "$(currentBranchPath)" | while read line || [ -n "$line" ]; do
+    id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
+    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+    if [[ $1 == $als ]]; then
+        echo $id
+        return 0
+    fi
+  done
+  echo "-- Alias not found --"
+  return 1
 }
 
 editCurrentPath() {
   vim $(currentBranchPath)
 }
 
-branchAlias(){
-  if [[ -z ${vcs_info_msg_0_} ]]; then
+addBranchAlias(){
+  if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
@@ -73,7 +89,7 @@ branchAlias(){
 }
 
 updateBranchNote() {
-  if [[ -z ${vcs_info_msg_0_} ]]; then
+  if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
@@ -103,7 +119,7 @@ updateBranchNote() {
 }
 
 branch(){
-  if [[ -z ${vcs_info_msg_0_} ]]; then
+  if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
@@ -134,12 +150,12 @@ branch(){
 }
 
 check(){
-  if [[ -z ${vcs_info_msg_0_} ]]; then
+  if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
-  if [[ $1 == master ]]; then
-    git checkout master
+  if [[ $1 == $DEFAULT_BRANCH ]]; then
+    git checkout $DEFAULT_BRANCH
     return 0
   fi
   cat "$(currentBranchPath)" | while read line || [ -n "$line" ]; do
@@ -150,12 +166,17 @@ check(){
         return 0
     fi
   done
-  echo '-- branch not found --'
+  git checkout $1
+  if [[ $?  == 0 ]]; then
+      echo "-- branch \"$1\" is not registered with alias --"
+      return 0
+  fi
+  echo "-- branch not found: $1 --"
   return 1
 }
 
 del(){
-  if [[ -z ${vcs_info_msg_0_} ]]; then
+  if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
@@ -191,15 +212,48 @@ del(){
 }
 
 branchHelp(){
+  echo "*  \$DEFAULT_BRANCH \t\t\t : Default branch name, usually master or main"
   echo "*  \$BRANCH_DELIMITER \t\t\t : Delimiter for branch info"
   echo "*  \$BRANCH_PATH \t\t\t : The path where branch info are stored"
+  echo "*  \$CUSTOMIZED_GIT_PROMPT \t\t : To whether customize the prompt or not"
   echo "*  currentBranchPath \t\t\t : returns the branch path for the current repository"
   echo "*  editCurrentPath \t\t\t : opens current branch path in vim for manual editing"
   echo "*  list \t\t\t\t : Lists all branches with their id, alias, and notes"
-  echo "*  branchAlias <id> <alias> [<note>] \t : Adds alias and note to a branch that is not stored yet"
+  echo "*  addBranchAlias <id> <alias> [<note>]  : Adds alias and note to a branch that is not stored yet"
   echo "*  updateBranchNote <id|alias> <note> \t : adds/updates the notes for a branch base on id/alias"
   echo "*  branch <id> <alias> [<note>] \t : creates a branch with id, alias, and note, and checks in"
   echo "*  check <id|alias> \t\t\t : checks into a branch base on an id or an alias"
   echo "*  del [...<id|alias>] \t\t\t : delete listed branches base on id or alias"
+  echo "*  currentBranch \t\t\t : Returns the name of current branch with alias and note"
+  echo "*  branchNameFromAlias <alias> \t\t : Returns the branch name from an alias"
   echo "*  branchHelp \t\t\t\t : shows this list"
 }
+
+# Custom prompt
+__getName() {
+  brn=""
+  if [[ -n $(__getBranchName) ]]; then
+    name=""
+    cat "$(currentBranchPath)" | while read line || [ -n "$line" ]; do
+      id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
+      als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+      if [[ $(__getBranchName) == $id ]]; then
+          name=" ($als)"
+          break
+      fi
+    done
+    topPath="$(git rev-parse --show-toplevel)"
+    brn="$(basename $topPath) ⌥ $(__getBranchName)$name "
+  else
+    brn="$(pwd) "
+  fi
+  echo $brn
+}
+
+if [[ $CUSTOMIZED_GIT_PROMPT == true ]]; then
+  __update_prompt() {
+    PS1="%n ➤ $(__getName)❖ "
+  }
+  PROMPT_COMMAND=__update_prompt
+  precmd() { eval "$PROMPT_COMMAND"; }
+fi
