@@ -48,6 +48,11 @@ branchNameFromAlias(){
     echo "-- Not a git repository --"
     return 1
   fi
+  if (( $# < 1 )); then
+    echo "Wrong Usage"
+    echo "\tbranchNameFromAlias <alias>"
+    return 1
+  fi
   cat "$(currentBranchPath)" | while read line || [ -n "$line" ]; do
     id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
     als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
@@ -71,7 +76,7 @@ addBranchAlias(){
   fi
   if (( $# < 2 )); then
     echo "Wrong Usage"
-    echo "\tcheck <id> <alias> [<note>]"
+    echo "\taddBranchAlias <id> <alias> [<note>]"
     return 1
   fi
   # checking for alias to be unique
@@ -91,6 +96,11 @@ addBranchAlias(){
 updateBranchNote() {
   if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
+    return 1
+  fi
+  if (( $# < 2 )); then
+    echo "Wrong Usage"
+    echo "\tupdateBranchNote <id|alias> <note>"
     return 1
   fi
   found=false
@@ -125,7 +135,7 @@ branch(){
   fi
   if (( $# < 2 )); then
     echo "Wrong Usage"
-    echo "\tcheck <id> <alias> [<note>]"
+    echo "\tbranch <id> <alias> [<note>]"
     return 1
   fi
   # checking for alias to be unique
@@ -154,6 +164,11 @@ check(){
     echo "-- Not a git repository --"
     return 1
   fi
+  if (( $# < 1 )); then
+    echo "Wrong Usage"
+    echo "\tcheck <id|alias>"
+    return 1
+  fi
   if [[ $1 == $DEFAULT_BRANCH ]]; then
     git checkout $DEFAULT_BRANCH
     return 0
@@ -178,6 +193,11 @@ check(){
 del(){
   if [[ -z $(__getBranchName) ]]; then
     echo "-- Not a git repository --"
+    return 1
+  fi
+  if (( $# < 1 )); then
+    echo "Wrong Usage"
+    echo "\tdel <alias|id> [...<alias|id>]"
     return 1
   fi
   branchPath=$(currentBranchPath)
@@ -243,7 +263,12 @@ __getName() {
       fi
     done
     topPath="$(git rev-parse --show-toplevel)"
-    brn="$(basename $topPath) ⌥ $(__getBranchName)$name "
+    repo=$(basename $topPath)
+    subpath=${${PWD:$(($(echo "$(PWD)" | awk -v repo="$repo" '{print index($0, repo)}') + ${#repo}))}#/}
+    if [ -n "$subpath" ]; then
+      subpath=" [$subpath]"
+    fi
+    brn="$repo$subpath ⌥ $(__getBranchName)$name "
   else
     brn="$(pwd) "
   fi
