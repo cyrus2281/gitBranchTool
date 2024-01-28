@@ -41,7 +41,7 @@ __DEFAULT_BRANCH_PATH=~/.gitBranchTool/.g
 BRANCH_DELIMITER=${BRANCH_DELIMITER:-'|'}
 BRANCH_PATH=${BRANCH_PATH:-"$__DEFAULT_BRANCH_PATH"}
 CUSTOMIZED_GIT_PROMPT=${CUSTOMIZED_GIT_PROMPT:-true}
-DEFAULT_BRANCH=${DEFAULT_BRANCH:-"master"}
+DEFAULT_BRANCH=${DEFAULT_BRANCH:-"main"}
 
 if [ -n "$ZSH_VERSION" ]; then
   # Current shell is ZSH
@@ -73,7 +73,7 @@ __g_list(){
     echo "-- Not a git repository --"
     return 1
   fi
-  cat -n $(__g_current_branch_path) | tr '|' '\t'
+  cat -n $(__g_current_branch_path) | tr "$BRANCH_DELIMITER" '\t'
 }
 
 __g_current_branch() {
@@ -81,7 +81,7 @@ __g_current_branch() {
     echo "-- Not a git repository --"
     return 1
   fi
-  cat $(__g_current_branch_path) | tr '|' '\t' | grep $(__g_get_branch_name)
+  cat $(__g_current_branch_path) | tr "$BRANCH_DELIMITER" '\t' | grep $(__g_get_branch_name)
   if [ $?  != 0 ]; then
       echo "master (or unregistered branch)"
   fi
@@ -94,17 +94,15 @@ __g_resolve_alias(){
   fi
   if (( $# < 1 )); then
     echo "Wrong Usage"
-    echo "\t__g_resolve_alias <alias>"
+    echo -e "\tg resolve-alias <alias>"
     return 1
   fi
-  cat "$(__g_current_branch_path)" | while read line || [ -n "$line" ]; do
-    id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+  while IFS="$BRANCH_DELIMITER" read -r id als desc; do
     if [[ $1 == $als ]]; then
         echo $id
         return 0
     fi
-  done
+  done < $(__g_current_branch_path)
   echo "-- Alias not found --"
   return 1
 }
@@ -120,18 +118,18 @@ __g_add_alias(){
   fi
   if (( $# < 2 )); then
     echo "Wrong Usage"
-    echo "\t__g_add_alias <id> <alias> [<note>]"
+    echo -e "\tg add-alias <id> <alias> [<note>]"
     return 1
   fi
   # checking for alias to be unique
-  cat "$(__g_current_branch_path)" | while read line || [ -n "$line" ]; do
-    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+  while IFS="$BRANCH_DELIMITER" read -r id als desc; do
     if [[ $2 == $als ]]; then
         echo '-- Alias should be unique --'
         echo '-- FAILED --'
         return 1
     fi
-  done
+  done < $(__g_current_branch_path)
+  # Adding branch, alias and note to list
   id=$1
   alias=$2
   shift 2
@@ -148,34 +146,36 @@ __g_update_branch_note() {
   fi
   if (( $# < 2 )); then
     echo "Wrong Usage"
-    echo "\t__g_update_branch_note <id|alias> <note>"
+    echo -e "\tg update-branch-note <id|alias> <note>"
     return 1
   fi
-  found=false
-  first=true
   branchPath=$(__g_current_branch_path)
   searchParam=$1
   shift
   newNote="$@"
-  cat "$branchPath" | while read line || [ -n "$line" ]; do
-    if [[ $first == true ]]; then
-        echo -n "" > "$branchPath"
-        first=false
-    fi
-    id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
-    note=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 3)
+  newContent=()
+  message=""
+  found=false
+  while IFS="$BRANCH_DELIMITER" read -r id als note; do
     # update note
     if [[ $searchParam == $id ||  $searchParam == $als ]]; then
-      echo "$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$newNote" >> "$branchPath"
-      echo "-- update note for '$id  $als' to '$newNote' --"
+      newContent+=("$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$newNote")
+      message="-- update note for '$id  $als' to '$newNote' --"
       found=true
     else
-      echo "$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note" >> "$branchPath"
+      newContent+=("$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note")
     fi
+  done < $(__g_current_branch_path)
+  # Updating file content
+  echo -n "" > "$branchPath"
+  for line in "${newContent[@]}"; do
+    echo "$line" >> "$branchPath"
   done
+
   if [[ $found == false ]]; then
       echo "-- branch not found: $searchParam --"
+  else
+    echo $message
   fi
 }
 
@@ -184,56 +184,56 @@ __g_update_branch_alias() {
     echo "-- Not a git repository --"
     return 1
   fi
-  echo "$@ $#"
   if (( $# < 2 )); then
     echo "Wrong Usage"
-    echo "\tg update-branch-alias <id> <note>"
+    echo -e "\tg update-branch-alias <id> <note>"
     return 1
   fi
+  newContent=()
+  message=""
   found=false
-  first=true
-  branchPath=$(__g_current_branch_path)
-  cat "$branchPath" | while read line || [ -n "$line" ]; do
-    if [[ $first == true ]]; then
-        echo -n "" > "$branchPath"
-        first=false
-    fi
-    id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
-    note=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 3)
+  while IFS="$BRANCH_DELIMITER" read -r id als note; do
     # update note
     if [[ $1 == $id ]]; then
-      echo "$id$BRANCH_DELIMITER$2$BRANCH_DELIMITER$note" >> "$branchPath"
-      echo "-- update alias for '$id' from  '$als' to '$2' --"
+      newContent+=("$id$BRANCH_DELIMITER$2$BRANCH_DELIMITER$note")
+      message="-- update alias for '$id' from  '$als' to '$2' --"
       found=true
-    else 
-      echo "$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note" >> "$branchPath"
+    else
+      newContent+=("$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note")
     fi
+  done < $(__g_current_branch_path)
+  # Updating file content
+  echo -n "" > "$branchPath"
+  for line in "${newContent[@]}"; do
+    echo "$line" >> "$branchPath"
   done
+
   if [[ $found == false ]]; then
       echo "-- branch not found: $1 --"
+  else
+    echo $message
   fi
 }
 
-__g_branch(){
+__g_create(){
   if [[ -z $(__g_get_branch_name) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
   if (( $# < 2 )); then
     echo "Wrong Usage"
-    echo "\tbranch <id> <alias> [<note>]"
+    echo -e "\tg create <id> <alias> [<note>]"
     return 1
   fi
   # checking for alias to be unique
-  cat "$(__g_current_branch_path)" | while read line || [ -n "$line" ]; do
-    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+  while IFS="$BRANCH_DELIMITER" read -r id als desc; do
     if [[ $2 == $als ]]; then
         echo '-- Alias should be unique --'
         echo '-- FAILED --'
         return 1
     fi
-  done
+  done < $(__g_current_branch_path)
+
   # creating and checking out to branch
   git checkout -b $1
   if [ $? -eq 0 ]; then
@@ -250,41 +250,41 @@ __g_branch(){
   fi
 }
 
-__g_check(){
+__g_switch(){
   if [[ -z $(__g_get_branch_name) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
   if (( $# < 1 )); then
     echo "Wrong Usage"
-    echo "\tcheck <id|alias>"
+    echo -e "\tg switch <id|alias>"
     return 1
   fi
   if [[ $1 == $DEFAULT_BRANCH ]]; then
     git checkout $DEFAULT_BRANCH
     return 0
   fi
-  cat "$(__g_current_branch_path)" | while read line || [ -n "$line" ]; do
-    id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-    als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+  # Searching for alias/id in the list
+  while IFS="$BRANCH_DELIMITER" read -r id als desc; do
     if [[ $1 == $als || $1 == $id ]]; then
         git checkout $id
         return 0
     fi
-  done
+  done < $(__g_current_branch_path)
+  # Branch not in list, trying to checkout
   git checkout $1
   # if successful
   if [[ $?  == 0 ]]; then
       # If provided alias
       if [[ -n $2 ]]; then
-        cat "$(__g_current_branch_path)" | while read line || [ -n "$line" ]; do
-          als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+        while IFS="$BRANCH_DELIMITER" read -r id als desc; do
           if [[ $2 == $als ]]; then
               echo '-- Alias should be unique --'
               echo '-- Branch Switch successfull. Failed to add branch alias. --'
               return 0 
           fi
-        done
+        done < $(__g_current_branch_path)
+        # Adding branch, alias and note to list
         id=$1
         alias=$2
         shift 2
@@ -309,34 +309,33 @@ __g_del(){
   fi
   if (( $# < 1 )); then
     echo "Wrong Usage"
-    echo "\tdel <alias|id> [...<alias|id>]"
+    echo -e "\tg del <alias|id> [...<alias|id>]"
     return 1
   fi
   branchPath=$(__g_current_branch_path)
   for value in "$@"; do
+    newContent=()
     found=false
-    first=true
-    cat "$branchPath" | while read line || [ -n "$line" ]; do
-      if [[ $first == true ]]; then
-          echo -n "" > "$branchPath"
-          first=false
-      fi
-      id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-      als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
-      note=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 3)
+    while IFS="$BRANCH_DELIMITER" read -r id als note; do
       # Delete base on id/alias
       if [[ $value == $id || $value == $als ]]; then
         echo "-- deleting branch: $id $als --"
-        git branch -D  $id
+        git branch -D $id
         if [ $? -ne 0 ]; then
-          echo '-- FAILED --'
-          echo "$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note" >> "$branchPath"
+          echo "-- FAILED to delete $id --"
+          newContent+=("$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note")
         fi
         found=true
       else 
-        echo "$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note" >> "$branchPath"
+        newContent+=("$id$BRANCH_DELIMITER$als$BRANCH_DELIMITER$note")
       fi
+    done < $(__g_current_branch_path)
+    # Updating file content
+    echo -n "" > "$branchPath"
+    for line in "${newContent[@]}"; do
+      echo "$line" >> "$branchPath"
     done
+    # branch not found
     if [[ $found == false ]]; then
         echo "-- branch not found: $value --"
     fi
@@ -347,13 +346,12 @@ __g_get_ids(){
   if [[ -z $(__g_get_branch_name) ]]; then
     return 0
   fi
-  branchPath=$(__g_current_branch_path)
   IDs=()
   # Read each line of the file
-  while IFS='|' read -r id name desc; do
+  while IFS="$BRANCH_DELIMITER" read -r id name desc; do
     # Add values to the array
     IDs+=("$id")
-  done < $branchPath
+  done < $(__g_current_branch_path)
   echo ${IDs[@]}
 }
 
@@ -361,30 +359,29 @@ __g_get_aliases(){
   if [[ -z $(__g_get_branch_name) ]]; then
     return 0
   fi
-  branchPath=$(__g_current_branch_path)
   names=()
   # Read each line of the file
-  while IFS='|' read -r id name desc; do
+  while IFS="$BRANCH_DELIMITER" read -r id name desc; do
     # Add values to the array
     names+=("$name")
-  done < $branchPath
-  echo ${names[@]}
+  done < $(__g_current_branch_path)
+  echo ${names[@]} ${DEFAULT_BRANCH}
 }
 
 g() {
   if (( $# < 1 )); then
-    echo "Invalid command!"
-    echo "\tEnter 'g help' to get a list of all command."
+    echo "Missing arguments!"
+    echo -e "\tEnter 'g help' to get a list of all command."
     return 1
   fi
   command=$1
   shift
   case $command in
     "create"|"c")
-      __g_branch $@
+      __g_create $@
       ;;
     "check"|"switch"|"s")
-      __g_check $@
+      __g_switch $@
       ;;
     "del"|"d")
       __g_del $@
@@ -412,6 +409,11 @@ g() {
       ;;
     "help"|"h")
       __g_help
+      ;;
+    *)
+      echo "g command not found!"
+      echo -e "\tEnter 'g help' to get a list of all command."
+      return 1
       ;;
   esac
 }
@@ -463,26 +465,43 @@ __g_complete() {
 # Register the autocompletion function for sayWhat command
 complete -F __g_complete g
 
+__g_get_subdirectory() {
+  repo=$1
+  # Find the index of the repository name in the current working directory
+  index=$(echo "$PWD" | awk -v repo="$repo" '{print index($0, repo)}')
+
+  # Use expr to calculate the start position for the subpath
+  start=$((index + ${#repo}))
+
+  # Extract the subpath after the repository name
+  subpath="${PWD:$start}"
+
+  # Remove leading slash if present
+  subpath=${subpath#/}
+
+  # Check if subpath is not empty and set it to [subpath]
+  if [ -n "$subpath" ]; then
+      subpath=" [$subpath]"
+  fi
+
+  echo $subpath
+}
+
 # Custom prompt
 __g_get_name() {
   brn=""
   if [[ -n $(__g_get_branch_name) ]]; then
-    name=""
-    cat "$(__g_current_branch_path)" | while read line || [ -n "$line" ]; do
-      id=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 1)
-      als=$(echo "$line" | cut -d "$BRANCH_DELIMITER" -f 2)
+    alias=""
+    while IFS="$BRANCH_DELIMITER" read -r id als desc; do
       if [[ $(__g_get_branch_name) == $id ]]; then
-          name=" ($als)"
+          alias=" ($als)"
           break
       fi
-    done
+    done < $(__g_current_branch_path)
     topPath="$(git rev-parse --show-toplevel)"
     repo=$(basename $topPath)
-    subpath=${${PWD:$(($(echo "$(PWD)" | awk -v repo="$repo" '{print index($0, repo)}') + ${#repo}))}#/}
-    if [ -n "$subpath" ]; then
-      subpath=" [$subpath]"
-    fi
-    brn="$repo$subpath ⌥ $(__g_get_branch_name)$name "
+    subpath=$(__g_get_subdirectory $repo)
+    brn="$repo$subpath ⌥ $(__g_get_branch_name)$alias "
   else
     brn="$(pwd) "
   fi
@@ -491,7 +510,7 @@ __g_get_name() {
 
 if [[ $CUSTOMIZED_GIT_PROMPT == true ]]; then
   __update_prompt() {
-    PS1="%n ➤ $(__g_get_name)❖ "
+    PS1="$(whoami) ➤ $(__g_get_name) ❖ "
   }
   PROMPT_COMMAND=__update_prompt
   precmd() { eval "$PROMPT_COMMAND"; }

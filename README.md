@@ -84,4 +84,24 @@ You can set the following parameters in your terminal profile:
                                             This character should not be in your branch or alias names
 ```
 
-Copyright 2024 Cyrus Mobini (@cyrus2281)
+## Contributing
+
+This repository is open for contributions.
+If you have any suggestions or issues, please open an issue or a pull request.
+
+In your pull request, please include a description of the changes you made and why you made them, and update the [CHANGE_LOGS.md](./CHANGE_LOGS.md), [VERSIONS.md](./VERSIONS.md), and [README.md](./README.md) (to contributors section) files accordingly.
+
+For versioning
+- Patch version: Bug fixes, support for new OS, etc.
+- Minor version: New features, new commands.
+- Major version: Major breaking changes, change of interface, backward incompatible changes
+
+### Contributors
+- [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)
+
+## License
+
+This project is licensed under the
+[MIT License](./LICENSE)
+
+Copyright 2024 - Cyrus Mobini (@cyrus2281)
