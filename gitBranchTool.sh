@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.1.0"
+G_VERSION="2.1.1"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -34,9 +34,9 @@ __g_help(){
   echo -e "\n*  add-alias <id> <alias> [<note>] \t  Adds alias and note to a branch that is not stored yet"
   echo -e "   a         <id> <alias> [<note>]"
   echo -e "\n*  update-branch-alias <id> <alias> \t  Updates the alias for the given branch id"
-  echo -e "\n*  update-branch-note <id|alias> <note> \t  Adds/updates the notes for a branch base on id/alias"
+  echo -e "\n*  update-branch-note <id|alias> <note>   Adds/updates the notes for a branch base on id/alias"
   echo -e "\n*  current-branch \t\t\t  Returns the name of active branch with alias and note"
-  echo -e "\n*  edit-repository-config \t\t\t  Opens active repository config file in vim for manual editing"
+  echo -e "\n*  edit-repository-config \t\t  Opens active repository config file in vim for manual editing"
   echo -e "\n*  update-check \t\t\t  Checks for new version of gitBranchTool and prompts for update"
   echo -e "\n*  help \t\t\t\t  Shows this help menu"
   echo -e "   h"
@@ -400,9 +400,8 @@ __g_check_for_update() {
         echo "Error: Neither curl nor wget is installed. Please install either curl or wget and try again."
         return 1
       fi
+      source $scriptPath
       echo -e "gitBranchTool has been successfully updated to version $latest_version"
-      echo -e "\nPlease restart your terminal or enter the following command to use the latest version."
-      echo -e "\t\tsource $scriptPath\n"
     fi
   else
     echo -e "\n-- You are using the latest version of gitBranchTool --\n"

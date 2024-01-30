@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.1
+> Updating terminal session after an update install
+
 ### Version 2.1.0
 > Added update check (and install) command
 

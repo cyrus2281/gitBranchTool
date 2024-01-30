@@ -1,6 +1,6 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.1.0-blue)
+![Version](https://img.shields.io/badge/version-v2.1.1-blue)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
@@ -80,11 +80,11 @@ The following commands can be used with gitBranchTool.
 
 *  update-branch-alias <id> <alias>       Updates the alias for the given branch id
 
-*  update-branch-note <id|alias> <note>           Adds/updates the notes for a branch base on id/alias
+*  update-branch-note <id|alias> <note>   Adds/updates the notes for a branch base on id/alias
 
 *  current-branch                         Returns the name of active branch with alias and note
 
-*  edit-repository-config                         Opens active repository config file in vim for manual editing
+*  edit-repository-config                 Opens active repository config file in vim for manual editing
 
 *  update-check                           Checks for new version of gitBranchTool and prompts for update
 
