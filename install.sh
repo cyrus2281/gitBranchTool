@@ -19,21 +19,20 @@ line_exists_in_file() {
 }
 
 # Adding gitBranchTool to profiles
-# $1 gitBranchTool script path
+# $1 gitBranchTool directory path
 # $2 G_CUSTOMIZED_PROMPT value
 # $3 profile path
 add_gitBranchTool_to_profile() {
   file_path=$(eval echo "$3")
   # Check if the line already exists in the file
-  if line_exists_in_file "source $1" "$file_path"; then
+  if line_exists_in_file "source $1/gitBranchTool.sh" "$file_path"; then
       echo -e "\tThe source command is already present in $file_path. Skipping."
   else
       # Add export command for G_CUSTOMIZED_PROMPT
-      echo -e "\n# Setting G_CUSTOMIZED_PROMPT in profile" >> "$file_path"
+      echo -e "\n# Setting G command - gitBranchTool" >> "$file_path"
       echo "export G_CUSTOMIZED_PROMPT=$2" >> "$file_path"
-
-      echo -e "\n# Loading gitBranchTool on terminal startup" >> "$file_path"
-      echo "source $1" >> "$file_path"
+      echo "export G_DIRECTORY=$1" >> "$file_path"
+      echo -e "source $1/gitBranchTool.sh\n" >> "$file_path"
       echo -e "\tAdded gitBranchTool to $file_path."
   fi
 }
@@ -75,11 +74,11 @@ else
 fi
 
 # Add script to bashrc 
-add_gitBranchTool_to_profile $gitBranchToolScriptPath $G_CUSTOMIZED_PROMPT ~/.bashrc
+add_gitBranchTool_to_profile $gitBranchToolDir $G_CUSTOMIZED_PROMPT ~/.bashrc
 
 # Check if on macOS and add to zshrc
 if [ "$(uname)" == "Darwin" ]; then
-  add_gitBranchTool_to_profile $gitBranchToolScriptPath $G_CUSTOMIZED_PROMPT ~/.zshrc
+  add_gitBranchTool_to_profile $gitBranchToolDir $G_CUSTOMIZED_PROMPT ~/.zshrc
 fi
 
 # Ask user for additional profiles
@@ -88,7 +87,7 @@ while true; do
   if [ -z "$profile_path" ]; then
     break
   else
-    add_gitBranchTool_to_profile $gitBranchToolScriptPath $G_CUSTOMIZED_PROMPT $profile_path
+    add_gitBranchTool_to_profile $gitBranchToolDir $G_CUSTOMIZED_PROMPT $profile_path
   fi
 done
 
@@ -96,5 +95,5 @@ done
 # Setup completed
 echo -e "\nSetup completed successfully."
 echo -e "\nPlease restart your terminal or enter the following command to start using gitBranchTool."
-echo -e "\n\t\tsource $gitBranchToolScriptPath\n"
+echo -e "\n\t\tsource $gitBranchToolScriptPath"
 echo -e "\nOnce activated, you can run 'g help' to get a list of all g commands.\n"

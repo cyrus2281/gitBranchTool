@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.0.3
+> Fixed issues of not using G_DIRECTORY path for config data
+
 ### Version 2.0.2
 > Added install script + env variable rename
 

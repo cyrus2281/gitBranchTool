@@ -1,6 +1,6 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.0.2-blue)
+![Version](https://img.shields.io/badge/version-v2.0.3-blue)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
@@ -40,17 +40,17 @@ bash -c "$(wget -O- https://raw.githubusercontent.com/cyrus2281/gitBranchTool/ma
 
 To activate the G customized prompt, type `yes` (or press enter) when prompted.
 
-The script will be installed in the `~/.gitBranchTool` directory. You can change this by setting the environment variable `GIT_BRANCH_TOOL_DIR` to the path you want to install the script in before running the installation script.
+The script will be installed in the `~/.gitBranchTool` directory. You can change this by setting the environment variable `GIT_BRANCH_TOOL_DIR` to **the absolute path** you want to install the script in before running the installation script. (This path will also be used to store the repository config files).
+
+```bash
+export GIT_BRANCH_TOOL_DIR=~/.gitBranchTool; curl ...
+```
 
 By default, the script will be added to your bash terminal profile (`~/.bashrc`), and ZSH terminal profile (`~/.zshrc`) if one MacOS.
 
 You will be prompt if you want to load the script in any other terminal profiles. You need to provide the absolute or relative path to the terminal profile file.
 Press enter with no value to break the loop.
 
-
-```bash
-export GIT_BRANCH_TOOL_DIR=~/.gitBranchTool; curl ...
-```
 
 ## Usage:
 ```bash
@@ -91,7 +91,8 @@ The following commands can be used with gitBranchTool.
 
 You can set the following parameters in your terminal profile:
   * G_DEFAULT_BRANCH                        Default branch name, usually master or main
-  * G_CUSTOMIZED_PROMPT                 To whether customize the prompt or not
+  * G_DIRECTORY                             Where the gitBranchTool.sh script is and where the branch info should be stored
+  * G_CUSTOMIZED_PROMPT                     To whether customize the prompt or not
   * G_BRANCH_DELIMITER                      Delimiter for branch info (default '|')
                                             This character should not be in your branch or alias names
 ```

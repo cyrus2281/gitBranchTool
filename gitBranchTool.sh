@@ -6,7 +6,14 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.0.2"
+G_VERSION="2.0.3"
+
+__DEFAULT_G_DIRECTORY=~/.gitBranchTool
+
+G_BRANCH_DELIMITER=${G_BRANCH_DELIMITER:-'|'}
+G_DIRECTORY=${G_DIRECTORY:-"$__DEFAULT_G_DIRECTORY"}
+G_CUSTOMIZED_PROMPT=${G_CUSTOMIZED_PROMPT:-true}
+G_DEFAULT_BRANCH=${G_DEFAULT_BRANCH:-"main"}
 
 __g_help(){
   echo -e "\nThe following commands can be used with gitBranchTool.\n"
@@ -34,18 +41,13 @@ __g_help(){
   echo -e "You can set the following parameters in your terminal profile:"
   echo -e "  * G_DEFAULT_BRANCH \t\t\t  Default branch name, usually master or main"
   echo -e "  * G_CUSTOMIZED_PROMPT \t\t  To whether customize the prompt or not"
+  echo -e "  * G_DIRECTORY \t\t\t  Where the gitBranchTool.sh script is and where the branch info should be stored"
   echo -e "  * G_BRANCH_DELIMITER \t\t\t  Delimiter for branch info (default '|')"
   echo -e "                      \t\t\t    This character should not be in your branch or alias names"
-  echo -e "\nGitBranchTool Version: $G_VERSION"
+  echo -e "\nG Directory: $G_DIRECTORY"
+  echo -e "GitBranchTool Version: $G_VERSION"
   echo -e "Created by Cyrus Mobini"
 }
-
-__DEFAULT_G_BRANCH_PATH=~/.gitBranchTool/.g
-
-G_BRANCH_DELIMITER=${G_BRANCH_DELIMITER:-'|'}
-G_BRANCH_PATH=${G_BRANCH_PATH:-"$__DEFAULT_G_BRANCH_PATH"}
-G_CUSTOMIZED_PROMPT=${G_CUSTOMIZED_PROMPT:-true}
-G_DEFAULT_BRANCH=${G_DEFAULT_BRANCH:-"main"}
 
 if [ -n "$ZSH_VERSION" ]; then
   # Current shell is ZSH
@@ -60,12 +62,12 @@ __g_get_branch_name() {
   echo $(git branch 2> /dev/null | grep \* | cut -d "*" -f2 | cut -d " " -f2)
 }
 
-__g_current_G_BRANCH_PATH(){
+__g_current_branch_path(){
   if [[ -z $(__g_get_branch_name) ]]; then
     echo "-- Not a git repository --"
     return 1
   fi
-  currentPath="$G_BRANCH_PATH.$(basename $(git rev-parse --show-toplevel))"
+  currentPath="$G_DIRECTORY/.g.$(basename $(git rev-parse --show-toplevel))"
   if [[ ! -e $currentPath ]]; then
     touch $currentPath
   fi
@@ -77,7 +79,7 @@ __g_list(){
     echo "-- Not a git repository --"
     return 1
   fi
-  cat -n $(__g_current_G_BRANCH_PATH) | tr "$G_BRANCH_DELIMITER" '\t'
+  cat -n $(__g_current_branch_path) | tr "$G_BRANCH_DELIMITER" '\t'
 }
 
 __g_current_branch() {
@@ -85,7 +87,7 @@ __g_current_branch() {
     echo "-- Not a git repository --"
     return 1
   fi
-  cat $(__g_current_G_BRANCH_PATH) | tr "$G_BRANCH_DELIMITER" '\t' | grep $(__g_get_branch_name)
+  cat $(__g_current_branch_path) | tr "$G_BRANCH_DELIMITER" '\t' | grep $(__g_get_branch_name)
   if [ $?  != 0 ]; then
       echo "master (or unregistered branch)"
   fi
@@ -106,13 +108,13 @@ __g_resolve_alias(){
         echo $id
         return 0
     fi
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   echo "-- Alias not found --"
   return 1
 }
 
 __g_edit_repo_config() {
-  vim $(__g_current_G_BRANCH_PATH)
+  vim $(__g_current_branch_path)
 }
 
 __g_add_alias(){
@@ -132,14 +134,14 @@ __g_add_alias(){
         echo '-- FAILED --'
         return 1
     fi
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   # Adding branch, alias and note to list
   id=$1
   alias=$2
   shift 2
   note=$@
   # Adding branch, alias and note to list
-  echo "$id$G_BRANCH_DELIMITER$alias$G_BRANCH_DELIMITER$note" >> "$(__g_current_G_BRANCH_PATH)"
+  echo "$id$G_BRANCH_DELIMITER$alias$G_BRANCH_DELIMITER$note" >> "$(__g_current_branch_path)"
   echo "-- Added alias '$alias' for branch '$id' --"
 }
 
@@ -153,7 +155,7 @@ __g_update_branch_note() {
     echo -e "\tg update-branch-note <id|alias> <note>"
     return 1
   fi
-  branchPath=$(__g_current_G_BRANCH_PATH)
+  branchPath=$(__g_current_branch_path)
   searchParam=$1
   shift
   newNote="$@"
@@ -169,7 +171,7 @@ __g_update_branch_note() {
     else
       newContent+=("$id$G_BRANCH_DELIMITER$als$G_BRANCH_DELIMITER$note")
     fi
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   # Updating file content
   echo -n "" > "$branchPath"
   for line in "${newContent[@]}"; do
@@ -205,7 +207,7 @@ __g_update_branch_alias() {
     else
       newContent+=("$id$G_BRANCH_DELIMITER$als$G_BRANCH_DELIMITER$note")
     fi
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   # Updating file content
   echo -n "" > "$branchPath"
   for line in "${newContent[@]}"; do
@@ -236,7 +238,7 @@ __g_create(){
         echo '-- FAILED --'
         return 1
     fi
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
 
   # creating and checking out to branch
   git checkout -b $1
@@ -246,7 +248,7 @@ __g_create(){
     shift 2
     note=$@
     # Adding branch, alias and note to list only if operation was successful
-    echo "$id$G_BRANCH_DELIMITER$alias$G_BRANCH_DELIMITER$note" >> "$(__g_current_G_BRANCH_PATH)"
+    echo "$id$G_BRANCH_DELIMITER$alias$G_BRANCH_DELIMITER$note" >> "$(__g_current_branch_path)"
     return 0
   else
     echo '-- FAILED --'
@@ -274,7 +276,7 @@ __g_switch(){
         git checkout $id
         return 0
     fi
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   # Branch not in list, trying to checkout
   git checkout $1
   # if successful
@@ -287,14 +289,14 @@ __g_switch(){
               echo '-- Branch Switch successfull. Failed to add branch alias. --'
               return 0 
           fi
-        done < $(__g_current_G_BRANCH_PATH)
+        done < $(__g_current_branch_path)
         # Adding branch, alias and note to list
         id=$1
         alias=$2
         shift 2
         note=$@
         # Adding branch, alias and note to list
-        echo "$id$G_BRANCH_DELIMITER$alias$G_BRANCH_DELIMITER$note" >> "$(__g_current_G_BRANCH_PATH)"
+        echo "$id$G_BRANCH_DELIMITER$alias$G_BRANCH_DELIMITER$note" >> "$(__g_current_branch_path)"
         echo "-- Branch $id has been registered with alias $alias"
         return 0
       else
@@ -316,7 +318,7 @@ __g_del(){
     echo -e "\tg del <alias|id> [...<alias|id>]"
     return 1
   fi
-  branchPath=$(__g_current_G_BRANCH_PATH)
+  branchPath=$(__g_current_branch_path)
   for value in "$@"; do
     newContent=()
     found=false
@@ -333,7 +335,7 @@ __g_del(){
       else 
         newContent+=("$id$G_BRANCH_DELIMITER$als$G_BRANCH_DELIMITER$note")
       fi
-    done < $(__g_current_G_BRANCH_PATH)
+    done < $(__g_current_branch_path)
     # Updating file content
     echo -n "" > "$branchPath"
     for line in "${newContent[@]}"; do
@@ -355,7 +357,7 @@ __g_get_ids(){
   while IFS="$G_BRANCH_DELIMITER" read -r id name desc; do
     # Add values to the array
     IDs+=("$id")
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   echo ${IDs[@]}
 }
 
@@ -368,7 +370,7 @@ __g_get_aliases(){
   while IFS="$G_BRANCH_DELIMITER" read -r id name desc; do
     # Add values to the array
     names+=("$name")
-  done < $(__g_current_G_BRANCH_PATH)
+  done < $(__g_current_branch_path)
   echo ${names[@]} ${G_DEFAULT_BRANCH}
 }
 
@@ -496,7 +498,7 @@ __g_get_name() {
           alias=" ($als)"
           break
       fi
-    done < $(__g_current_G_BRANCH_PATH)
+    done < $(__g_current_branch_path)
     topPath="$(git rev-parse --show-toplevel)"
     repo=$(basename $topPath)
     subpath=$(__g_get_subdirectory $repo)
