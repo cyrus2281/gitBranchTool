@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.0.3"
+G_VERSION="2.0.4"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -458,6 +458,12 @@ __g_complete() {
       "update-branch-alias")
         if [ $COMP_CWORD -eq 2 ]; then
             commands=($(__g_get_ids))
+        fi
+        ;;
+      # Git branches only first arg
+      "add-alias"|"a")
+        if [ $COMP_CWORD -eq 2 ]; then
+            commands=($(git branch | cut -c 3-))
         fi
         ;;
     esac

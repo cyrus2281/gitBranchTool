@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.0.4
+> Added auto complete on branch names for add-alias command
+
 ### Version 2.0.3
 > Fixed issues of not using G_DIRECTORY path for config data
 
