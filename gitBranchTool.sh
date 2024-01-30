@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# A bash tool to facilitate managing git branch with long cryptic names with aliases
+# A bash tool to facilitate managing git branches with long cryptic names with aliases
 
 # Author: Cyrus Mobini - https://github.com/cyrus2281
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.0.4"
+G_VERSION="2.1.0"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -16,6 +16,8 @@ G_CUSTOMIZED_PROMPT=${G_CUSTOMIZED_PROMPT:-true}
 G_DEFAULT_BRANCH=${G_DEFAULT_BRANCH:-"main"}
 
 __g_help(){
+  echo -e "\nGit Branch Tool"
+  echo -e "A bash tool to facilitate managing git branches with long cryptic names with aliases"
   echo -e "\nThe following commands can be used with gitBranchTool.\n"
   echo -e "   g <command> [...<args>]\n"
   echo -e "\n*  create <id> <alias> [<note>] \t  Creates a branch with id, alias, and note, and checks into it"
@@ -35,6 +37,7 @@ __g_help(){
   echo -e "\n*  update-branch-note <id|alias> <note> \t  Adds/updates the notes for a branch base on id/alias"
   echo -e "\n*  current-branch \t\t\t  Returns the name of active branch with alias and note"
   echo -e "\n*  edit-repository-config \t\t\t  Opens active repository config file in vim for manual editing"
+  echo -e "\n*  update-check \t\t\t  Checks for new version of gitBranchTool and prompts for update"
   echo -e "\n*  help \t\t\t\t  Shows this help menu"
   echo -e "   h"
   echo -e ""
@@ -48,6 +51,10 @@ __g_help(){
   echo -e "GitBranchTool Version: $G_VERSION"
   echo -e "Created by Cyrus Mobini"
 }
+
+__gitBranchToolURL=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/gitBranchTool.sh
+__gitBranchToolVersionUrl=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/VERSION
+__gitBranchToolChangeLogsUrl=https://github.com/cyrus2281/gitBranchTool/blob/main/CHANGE_LOGS.md
 
 if [ -n "$ZSH_VERSION" ]; then
   # Current shell is ZSH
@@ -348,6 +355,60 @@ __g_del(){
   done
 }
 
+__g_check_for_update() {
+  # Get latest vesion from github - 
+  latest_version=$(curl -s $__gitBranchToolVersionUrl)
+  # Check if the version is different
+  if [[ $latest_version != $G_VERSION ]]; then
+    echo -e "\n-- There is a new version of gitBranchTool available --"
+    echo -e "Change logs can be found at:\n\t$__gitBranchToolChangeLogsUrl"
+    echo -e "\n\tCurrent Version: $G_VERSION"
+    echo -e "\tLatest Version: $latest_version"
+    # Check if it's a major change (X.0.0)
+    if [[ $(echo $latest_version | cut -d '.' -f1) != $(echo $G_VERSION | cut -d '.' -f1) ]]; then
+      echo -e "\nThis is a major change which includes breaking changes, change of interface, backward incompatible changes, etc."
+      echo -e "Some of the commands might have been partially or completely changed."
+      echo -e "\nPlease check the change logs before updating!"
+    # Check if it's a minor change (0.X.0)
+    elif [[ $(echo $latest_version | cut -d '.' -f2) != $(echo $G_VERSION | cut -d '.' -f2) ]]; then
+      echo -e "\nThis is a minor change which includes new features, new commands, etc."
+      echo "All changes are backward compatible."
+    # Check if it's a patch change (0.0.X)
+    elif [[ $(echo $latest_version | cut -d '.' -f3) != $(echo $G_VERSION | cut -d '.' -f3) ]]; then
+      echo -e "\nThis is a patch change which includes bug fixes, performance improvements, etc."
+      echo "All changes are backward compatible."
+    fi
+
+    # Prompt if user wants to update
+    echo ""
+    read -p "Do you want to update? (yes/no, default: yes): " update_preference
+    update_preference=$(echo "$update_preference" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
+    update_preference=${update_preference:-yes}
+
+    # Update if user wants to
+    if [[ "$update_preference" =~ ^(yes|y)$ ]]; then
+      scriptPath=$G_DIRECTORY/gitBranchTool.sh
+      echo -e "\nDownloading the gitBranchTool script"
+      # Check if curl exists
+      if command -v "curl" >/dev/null 2>&1; then
+        curl -o $scriptPath -fsSL $__gitBranchToolURL
+      # Check if wget exists
+      elif command -v "wget" >/dev/null 2>&1; then
+        wget -O $scriptPath  $__gitBranchToolURL
+      # Throw an error if neither curl nor wget is found
+      else
+        echo "Error: Neither curl nor wget is installed. Please install either curl or wget and try again."
+        return 1
+      fi
+      echo -e "gitBranchTool has been successfully updated to version $latest_version"
+      echo -e "\nPlease restart your terminal or enter the following command to use the latest version."
+      echo -e "\t\tsource $scriptPath\n"
+    fi
+  else
+    echo -e "\n-- You are using the latest version of gitBranchTool --\n"
+  fi
+}
+
 __g_get_ids(){
   if [[ -z $(__g_get_branch_name) ]]; then
     return 0
@@ -413,6 +474,9 @@ g() {
     "edit-repository-config")
     __g_edit_repo_config
       ;;
+    "update-check")
+    __g_check_for_update
+      ;;
     "help"|"h")
       __g_help
       ;;
@@ -435,7 +499,7 @@ __g_complete() {
   if [ $COMP_CWORD -eq 1 ]; then
       commands=("check" "list" "del" "help" "create" "switch" \
        "resolve-alias" "edit-repository-config" "add-alias" \
-       "update-branch-note" "current-branch" "update-branch-alias" )
+       "update-branch-note" "current-branch" "update-branch-alias" "update-check" )
   else
     case "$command_word" in
       # Aliases & ID on all args

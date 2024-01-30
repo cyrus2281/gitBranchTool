@@ -1,6 +1,6 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.0.4-blue)
+![Version](https://img.shields.io/badge/version-v2.1.0-blue)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
@@ -8,7 +8,7 @@
 
 **Tested and supported on: Bash, ZSH, and Git Bash**
 
-> A bash tool to facilitate managing git branch with long cryptic names with aliases
+> A bash tool to facilitate managing git branches with long cryptic names with aliases
 
 The `gitBranchTool.sh` bash script adds `g` command to your terminal. This command provides additional functionalities around working with *git* branches. 
 
@@ -53,7 +53,7 @@ Press enter with no value to break the loop.
 
 
 ## Usage:
-```bash
+```md
 The following commands can be used with gitBranchTool.
 
    g <command> [...<args>]
@@ -86,6 +86,8 @@ The following commands can be used with gitBranchTool.
 
 *  edit-repository-config                         Opens active repository config file in vim for manual editing
 
+*  update-check                           Checks for new version of gitBranchTool and prompts for update
+
 *  help                                   Shows this help menu
    h
 
@@ -105,7 +107,7 @@ If you have any suggestions or issues, please open an issue or a pull request.
 In your pull request, please include a description of the changes you made and why you made them, and update the [CHANGE_LOGS.md](./CHANGE_LOGS.md), [VERSIONS.md](./VERSIONS.md), and [README.md](./README.md) (to contributors section) files accordingly.
 
 For versioning
-- Patch version: Bug fixes, support for new OS, etc.
+- Patch version: Bug fixes, performance improvements, etc.
 - Minor version: New features, new commands.
 - Major version: Major breaking changes, change of interface, backward incompatible changes
 

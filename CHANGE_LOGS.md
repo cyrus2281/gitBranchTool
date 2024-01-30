@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.0
+> Added update check (and install) command
+
 ### Version 2.0.4
 > Added auto complete on branch names for add-alias command
 
