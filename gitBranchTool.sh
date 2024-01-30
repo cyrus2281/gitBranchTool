@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.1.1"
+G_VERSION="2.1.2"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -380,8 +380,8 @@ __g_check_for_update() {
     fi
 
     # Prompt if user wants to update
-    echo ""
-    read -p "Do you want to update? (yes/no, default: yes): " update_preference
+    echo -ne "\nDo you want to update? (yes/no, default: yes): "; 
+    read update_preference
     update_preference=$(echo "$update_preference" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
     update_preference=${update_preference:-yes}
 

@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.2
+> Fixed issues of not being able to read the propmt outside bash
+
 ### Version 2.1.1
 > Updating terminal session after an update install
 
