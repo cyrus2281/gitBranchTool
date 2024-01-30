@@ -1,5 +1,11 @@
 # gitBranchTool
 
+![Version](https://img.shields.io/badge/version-v2.0.2-blue)
+[![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
+[![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
+[![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
+[![GitHub stars](https://img.shields.io/github/stars/cyrus2281/gitBranchTool?style=social)](https://github.com/cyrus2281/gitBranchTool/stargazers)
+
 **Tested and supported on: Bash, ZSH, and Git Bash**
 
 > A bash tool to facilitate managing git branch with long cryptic names with aliases
@@ -18,27 +24,33 @@ On top of all these, `g` provides a **custom prompt** that displays the name of 
 
 ## Installation
 
-Download the script and run:
+Run the installation script using the following script:
+
+- To download using `curl`:
+
+```bash  
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
+```
+
+- To download using `wget`:
 
 ```bash
-echo "source PATH_TO_SCRIPT/gitBranchTool.sh" >> ~/.bashrc
+bash -c "$(wget -O- https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
 ```
-- Replace `PATH_TO_SCRIPT` with the path to the script file.
-- Replace `~/.bashrc` with the path to your bash profile file.
-    - `~/.bashrc` is the default bash profile file for most Linux distributions.
-    - `~/.zshrc` is the default zsh profile file for most MacOS distributions.
 
-### Install without custom prompt
-Alternatively, you can install the script without the custom prompt by setting the environment variable `CUSTOMIZED_GIT_PROMPT` to `false` in your bash profile file before sourcing the script.
+To activate the G customized prompt, type `yes` (or press enter) when prompted.
+
+The script will be installed in the `~/.gitBranchTool` directory. You can change this by setting the environment variable `GIT_BRANCH_TOOL_DIR` to the path you want to install the script in before running the installation script.
+
+By default, the script will be added to your bash terminal profile (`~/.bashrc`), and ZSH terminal profile (`~/.zshrc`) if one MacOS.
+
+You will be prompt if you want to load the script in any other terminal profiles. You need to provide the absolute or relative path to the terminal profile file.
+Press enter with no value to break the loop.
+
 
 ```bash
-echo "export CUSTOMIZED_GIT_PROMPT=false" >> ~/.bashrc
-echo "source PATH_TO_SCRIPT/gitBranchTool.sh" >> ~/.bashrc
+export GIT_BRANCH_TOOL_DIR=~/.gitBranchTool; curl ...
 ```
-- Replace `PATH_TO_SCRIPT` with the path to the script file.
-- Replace `~/.bashrc` with the path to your bash profile file.
-
-
 
 ## Usage:
 ```bash
@@ -78,9 +90,9 @@ The following commands can be used with gitBranchTool.
    h
 
 You can set the following parameters in your terminal profile:
-  * DEFAULT_BRANCH                        Default branch name, usually master or main
-  * CUSTOMIZED_GIT_PROMPT                 To whether customize the prompt or not
-  * BRANCH_DELIMITER                      Delimiter for branch info (default '|')
+  * G_DEFAULT_BRANCH                        Default branch name, usually master or main
+  * G_CUSTOMIZED_PROMPT                 To whether customize the prompt or not
+  * G_BRANCH_DELIMITER                      Delimiter for branch info (default '|')
                                             This character should not be in your branch or alias names
 ```
 
@@ -95,6 +107,12 @@ For versioning
 - Patch version: Bug fixes, support for new OS, etc.
 - Minor version: New features, new commands.
 - Major version: Major breaking changes, change of interface, backward incompatible changes
+
+Version need to be updated in following files:
+- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3)
+- [VERSION line 1](./VERSION#L1)
+- [README.md line 3](./README.md#L3)
+- [gitBranchTool.sh line 5](./gitBranchTool.sh#L5)
 
 ### Contributors
 - [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)
