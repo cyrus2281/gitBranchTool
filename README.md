@@ -1,6 +1,6 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.1.3-blue)
+![Version](https://img.shields.io/badge/version-v2.1.4-blue)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
@@ -38,13 +38,15 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/cyrus2281/gitBranchTool/
 bash -c "$(wget -O- https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
 ```
 
-To activate the G customized prompt, type `yes` (or press enter) when prompted.
+To activate the G customized prompt, type `yes` (or press enter) when prompted. You can change this later by re-running the installation script and providing the same values except for G customized prompt, or by manually changing the `G_CUSTOMIZED_PROMPT` variable in your terminal profile file.
 
 The script will be installed in the `~/.gitBranchTool` directory. You can change this by setting the environment variable `GIT_BRANCH_TOOL_DIR` to **the absolute path** you want to install the script in before running the installation script. (This path will also be used to store the repository config files).
 
 ```bash
 export GIT_BRANCH_TOOL_DIR=~/.gitBranchTool; curl ...
 ```
+
+- Note: If you are using a custom directory, you should remember to use the same directory again or clean up manually if you're re-running the install.sh script.
 
 By default, the script will be added to your bash terminal profile (`~/.bashrc`), and ZSH terminal profile (`~/.zshrc`) if one MacOS.
 
@@ -111,11 +113,11 @@ For versioning
 - Minor version: New features, new commands.
 - Major version: Major breaking changes, change of interface, backward incompatible changes
 
-Version need to be updated in following files:
-- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3)
+Version need to be updated in following files (Use search and replace all):
+- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
 - [VERSION line 1](./VERSION#L1)
 - [README.md line 3](./README.md#L3)
-- [gitBranchTool.sh line 5](./gitBranchTool.sh#L5)
+- [gitBranchTool.sh line 9](./gitBranchTool.sh#L9)
 
 ### Contributors
 - [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)
