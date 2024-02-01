@@ -37,7 +37,7 @@ add_gitBranchTool_to_profile() {
   fi
 }
 
-gitBranchToolURL=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/gitBranchTool.sh
+gitBranchToolURL=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/latest-bash/gitBranchTool.sh
 gitBranchToolDir=$(eval echo "${GIT_BRANCH_TOOL_DIR:-"~/.gitBranchTool"}")
 gitBranchToolScriptPath=$gitBranchToolDir/gitBranchTool.sh
 
