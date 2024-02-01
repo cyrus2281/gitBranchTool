@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.4
+> Updated install script so it can update the value of G_CUSTOMIZED_PROMPT
+
 ### Version 2.1.3
 > Changed remote urls from master to release branch for updates
 
