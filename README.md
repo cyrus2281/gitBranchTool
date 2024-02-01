@@ -29,13 +29,13 @@ Run the installation script using the following script:
 - To download using `curl`:
 
 ```bash  
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/cyrus2281/gitBranchTool/latest-bash/install.sh)"
 ```
 
 - To download using `wget`:
 
 ```bash
-bash -c "$(wget -O- https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
+bash -c "$(wget -O- https://raw.githubusercontent.com/cyrus2281/gitBranchTool/latest-bash/install.sh)"
 ```
 
 To activate the G customized prompt, type `yes` (or press enter) when prompted.
