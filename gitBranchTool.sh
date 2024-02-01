@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.1.2"
+G_VERSION="2.1.3"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -52,9 +52,9 @@ __g_help(){
   echo -e "Created by Cyrus Mobini"
 }
 
-__gitBranchToolURL=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/gitBranchTool.sh
-__gitBranchToolVersionUrl=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/VERSION
-__gitBranchToolChangeLogsUrl=https://github.com/cyrus2281/gitBranchTool/blob/main/CHANGE_LOGS.md
+__gitBranchToolURL=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/latest-bash/gitBranchTool.sh
+__gitBranchToolVersionUrl=https://raw.githubusercontent.com/cyrus2281/gitBranchTool/latest-bash/VERSION
+__gitBranchToolChangeLogsUrl=https://github.com/cyrus2281/gitBranchTool/blob/latest-bash/CHANGE_LOGS.md
 
 if [ -n "$ZSH_VERSION" ]; then
   # Current shell is ZSH

@@ -1,7 +1,10 @@
 # Version Change Logs
 
+### Version 2.1.3
+> Changed remote urls from master to release branch for updates
+
 ### Version 2.1.2
-> Fixed issues of not being able to read the propmt outside bash
+> Fixed issues of not being able to read the prompt outside bash
 
 ### Version 2.1.1
 > Updating terminal session after an update install
