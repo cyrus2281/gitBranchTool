@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.1.5"
+G_VERSION="2.1.6"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
