@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.1.4"
+G_VERSION="2.1.5"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -74,7 +74,7 @@ __g_current_branch_path(){
     echo "-- Not a git repository --"
     return 1
   fi
-  currentPath="$G_DIRECTORY/.g.$(basename $(git rev-parse --show-toplevel))"
+  currentPath="$G_DIRECTORY/.g.$(basename "$(git rev-parse --show-toplevel)")"
   if [[ ! -e $currentPath ]]; then
     touch $currentPath
   fi

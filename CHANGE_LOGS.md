@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.5
+> Fixed issue of g tool failing on paths with spaces in them
+
 ### Version 2.1.4
 > Updated install script so it can update the value of G_CUSTOMIZED_PROMPT
 
