@@ -29,7 +29,7 @@ add_gitBranchTool_to_profile() {
         echo -ne "\tThe source command is already present in $file_path."
     if ! line_exists_in_file "export G_CUSTOMIZED_PROMPT=$2" "$file_path"; then
       # Replace the line starting "export G_CUSTOMIZED_PROMPT="
-      sed -i "s/^export G_CUSTOMIZED_PROMPT=.*/export G_CUSTOMIZED_PROMPT=$2/" "$file_path"
+      sed -i "" "s#^export G_CUSTOMIZED_PROMPT=.*#export G_CUSTOMIZED_PROMPT=$2#" "$file_path"
       echo -e " Updated G_CUSTOMIZED_PROMPT value to '$2'."
     else
      echo " Skpping..."

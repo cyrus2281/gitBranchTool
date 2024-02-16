@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.6
+> Fixed updating env variables issue on Mac for install script
+
 ### Version 2.1.5
 > Fixed issue of g tool failing on paths with spaces in them
 
