@@ -6,7 +6,7 @@
 # Github Repository: https://github.com/cyrus2281/gitBranchTool
 # License: MIT License
 
-G_VERSION="2.1.6"
+G_VERSION="2.1.7"
 
 __DEFAULT_G_DIRECTORY=~/.gitBranchTool
 
@@ -134,6 +134,15 @@ __g_add_alias(){
     echo -e "\tg add-alias <id> <alias> [<note>]"
     return 1
   fi
+
+  # checking if the target branch exists locally
+  if ! git branch | grep -q " $1$"; then
+    echo "-- Branch $1 does not exists locally --"
+    echo -e "\tIf adding a remote branch, first check into it 'g s $1'"
+    echo '-- FAILED --'
+    return 1
+  fi
+
   # checking for alias to be unique
   while IFS="$G_BRANCH_DELIMITER" read -r id als desc; do
     if [[ $2 == $als ]]; then
@@ -350,7 +359,12 @@ __g_del(){
     done
     # branch not found
     if [[ $found == false ]]; then
-        echo "-- branch not found: $value --"
+        if git branch | grep -q " $value$"; then
+          echo "-- deleting unregisterd branch: $value --"
+          git branch -D $value
+        else
+          echo "-- branch not found: $value --"
+        fi
     fi
   done
 }
