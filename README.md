@@ -1,6 +1,6 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.1.7-blue)
+![Version](https://img.shields.io/badge/version-v2.1.8-blue)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
@@ -61,44 +61,46 @@ The following commands can be used with gitBranchTool.
    g <command> [...<args>]
 
 
-*  create <id> <alias> [<note>]           Creates a branch with id, alias, and note, and checks into it
-   c      <id> <alias> [<note>]                  Uses the git command "git checkout -b <id>"
+*  create <id> <alias> [<note>]                   Creates a branch with id, alias, and note, and checks into it
+   c      <id> <alias> [<note>]                          Uses the git command "git checkout -b <id>"
 
-*  check  <id|alias>                      Checks into a branch base on an id or an alias
-   switch <id|alias>                             Uses the git command "git checkout <id>"
+*  check  <id|alias>                              Checks into a branch base on an id or an alias
+   switch <id|alias>                                     Uses the git command "git checkout <id>"
    s      <id|alias>
+   s      <unregistered-id> [<alias> <note>]      When switching to an unregistered branch, you can provide new alias
+                                                         and optional note to register it at the same time.
 
-*  del [...<id|alias>]                    Deletes listed branches base on ID or alias (requires at least one ID/alias)
-   d   [...<id|alias>]                           Uses the git command "git branch -D [...<id>] "
+*  del [...<id|alias>]                            Deletes listed branches base on ID or alias (requires at least one ID/alias)
+   d   [...<id|alias>]                                   Uses the git command "git branch -D [...<id>] "
 
-*  list                                   Lists all branches with their id, alias, and notes
+*  list                                           Lists all branches with their id, alias, and notes
    l
 
-*  resolve-alias <alias>                  Resolves the branch name from an alias
+*  resolve-alias <alias>                          Resolves the branch name from an alias
    r             <alias>
 
-*  add-alias <id> <alias> [<note>]        Adds alias and note to a branch that is not stored yet
+*  add-alias <id> <alias> [<note>]                Adds alias and note to a branch that is not stored yet
    a         <id> <alias> [<note>]
 
-*  update-branch-alias <id> <alias>       Updates the alias for the given branch id
+*  update-branch-alias <id> <alias>               Updates the alias for the given branch id
 
-*  update-branch-note <id|alias> <note>   Adds/updates the notes for a branch base on id/alias
+*  update-branch-note <id|alias> <note>           Adds/updates the notes for a branch base on id/alias
 
-*  current-branch                         Returns the name of active branch with alias and note
+*  current-branch                                 Returns the name of active branch with alias and note
 
-*  edit-repository-config                 Opens active repository config file in vim for manual editing
+*  edit-repository-config                         Opens active repository config file in vim for manual editing
 
-*  update-check                           Checks for new version of gitBranchTool and prompts for update
+*  update-check                                   Checks for new version of gitBranchTool and prompts for update
 
-*  help                                   Shows this help menu
+*  help                                           Shows this help menu
    h
 
 You can set the following parameters in your terminal profile:
-  * G_DEFAULT_BRANCH                        Default branch name, usually master or main
-  * G_DIRECTORY                             Where the gitBranchTool.sh script is and where the branch info should be stored
-  * G_CUSTOMIZED_PROMPT                     To whether customize the prompt or not
-  * G_BRANCH_DELIMITER                      Delimiter for branch info (default '|')
-                                            This character should not be in your branch or alias names
+  * G_DEFAULT_BRANCH                              Default branch name, usually master or main
+  * G_CUSTOMIZED_PROMPT                           To whether customize the prompt or not
+  * G_DIRECTORY                                   Where the gitBranchTool.sh script is and where the branch info should be stored
+  * G_BRANCH_DELIMITER                            Delimiter for branch info (default '|')
+                                                    This character should not be in your branch or alias names
 ```
 
 ## Contributing
