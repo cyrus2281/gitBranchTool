@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 2.1.8
+> Updated the help documentation
+
 ### Version 2.1.7
 > Checking if the branch exists for 'g add-alias' + allowing deleting branches that are not registered
 
