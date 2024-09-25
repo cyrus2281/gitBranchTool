@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.0
+> Rewrote codebase in GoLang instead of Bash
+
 ### Version 2.1.8
 > Updated the help documentation
 
