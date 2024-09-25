@@ -1,9 +1,11 @@
 package internal
 
+import "fmt"
+
 type Branch struct {
-	name  string
-	alias string
-	note  string
+	Name  string `json:"name"`
+	Alias string `json:"alias"`
+	Note  string `json:"note"`
 }
 
 // Convert to string
@@ -13,5 +15,10 @@ func (b *Branch) String(delimiter ...string) string {
 	if len(delimiter) > 0 {
 		d = delimiter[0]
 	}
-	return b.name + d + b.alias + d + b.note
+	return b.Name + d + b.Alias + d + b.Note
+}
+
+// Convert to print format
+func (b *Branch) Print() string {
+	return fmt.Sprintf("%-20s\t%-20s\t%-20s", b.Name, b.Alias, b.Note)
 }
