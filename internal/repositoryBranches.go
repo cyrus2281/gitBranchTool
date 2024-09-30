@@ -69,3 +69,89 @@ func (s *RepositoryBranches) AddBranch(branch Branch) {
 	s.branches = append(s.branches, branch)
 	s.save()
 }
+
+func (s *RepositoryBranches) BranchExists(branch Branch) bool {
+	if !s.loaded {
+		s.load()
+	}
+	for _, b := range s.branches {
+		if b.Name == branch.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *RepositoryBranches) AliasExists(alias string) bool {
+	if !s.loaded {
+		s.load()
+	}
+	for _, b := range s.branches {
+		if b.Alias == alias {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *RepositoryBranches) GetBranchByAlias(alias string) (Branch, bool) {
+	if !s.loaded {
+		s.load()
+	}
+	for _, b := range s.branches {
+		if b.Alias == alias {
+			return b, true
+		}
+	}
+	return Branch{}, false
+}
+
+func (s *RepositoryBranches) GetBranchByName(name string) (Branch, bool) {
+	if !s.loaded {
+		s.load()
+	}
+	for _, b := range s.branches {
+		if b.Name == name {
+			return b, true
+		}
+	}
+	return Branch{}, false
+}
+
+func (s *RepositoryBranches) GetBranchByNameOrAlias(name string) (Branch, bool) {
+	if !s.loaded {
+		s.load()
+	}
+	for _, b := range s.branches {
+		if b.Name == name || b.Alias == name {
+			return b, true
+		}
+	}
+	return Branch{}, false
+}
+
+func (s *RepositoryBranches) RemoveBranch(branch Branch) {
+	if !s.loaded {
+		s.load()
+	}
+	for index, b := range s.branches {
+		if b.Name == branch.Name {
+			s.branches = append(s.branches[:index], s.branches[index+1:]...)
+			s.save()
+			return
+		}
+	}
+}
+
+func (s *RepositoryBranches) UpdateBranch(branch Branch) {
+	if !s.loaded {
+		s.load()
+	}
+	for index, b := range s.branches {
+		if b.Name == branch.Name {
+			s.branches[index] = branch
+			s.save()
+			return
+		}
+	}
+}

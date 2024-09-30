@@ -67,3 +67,14 @@ func (g *Git) GetRepositoryName() (string, error) {
 
 	return g.repositoryName, nil
 }
+
+func (g *Git) CreateNewBranch(name string) error {
+	_, err := runCommand([]string{"git", "branch", name})
+	return err
+}
+
+// SwitchToNewBranch creates a new branch and switches to it
+func (g *Git) SwitchToNewBranch(name string) error {
+	_, err := runCommand([]string{"git", "checkout", "-b", name})
+	return err
+}
