@@ -22,3 +22,18 @@ func GetHome() string {
 	}
 	return gHome
 }
+
+func GetRepositoryBranches() RepositoryBranches {
+	git := Git{}
+	// Get the home directory
+	gHome := GetHome()
+	repositoryName, err := git.GetRepositoryName()
+	if err != nil {
+		panic(err)
+	}
+	repoBranches := RepositoryBranches{
+		RepositoryName: repositoryName,
+		StoreDirectory: gHome,
+	}
+	return repoBranches
+}
