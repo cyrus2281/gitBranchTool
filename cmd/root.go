@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -55,11 +56,19 @@ func initConfig() {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
+		home = filepath.Join(home, ".gitBranchTool_go")
+		if _, err := os.Stat(home); os.IsNotExist(err) {
+			// Create the directory
+			err = os.Mkdir(home, 0755)
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+		}
 
 		// Search config in home directory with name ".gitBranchTool" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".gitBranchTool_go")
+		viper.SetConfigName("gitBranchTool.config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
