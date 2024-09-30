@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
@@ -36,12 +37,12 @@ var createCmd = &cobra.Command{
 
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			panic("Not a git repository")
+			log.Fatalln("Not a git repository")
 		}
 
 		repoBranches := internal.GetRepositoryBranches()
 		if repoBranches.AliasExists(newBranch.Alias) {
-			panic("Alias already exists. Alias must be unique")
+			log.Fatalln("Alias already exists. Alias must be unique")
 		}
 
 		createOnly, _ := cmd.Flags().GetBool("only-create")
@@ -52,7 +53,7 @@ var createCmd = &cobra.Command{
 			err = git.SwitchToNewBranch(newBranch.Name)
 		}
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		repoBranches.AddBranch(newBranch)
