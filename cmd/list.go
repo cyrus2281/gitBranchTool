@@ -5,12 +5,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // listCmd represents the list command
@@ -21,14 +18,7 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		// Get the home directory
-		gHome := viper.GetString("GIT_BRANCH_TOOL_HOME")
-		if gHome == "" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				panic(err)
-			}
-			gHome = filepath.Join(home, ".gitBranchTool_go")
-		}
+		gHome := internal.GetHome()
 		repositoryName, err := git.GetRepositoryName()
 		if err != nil {
 			panic(err)
