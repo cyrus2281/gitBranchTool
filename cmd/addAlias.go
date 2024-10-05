@@ -1,40 +1,53 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
 // addAliasCmd represents the addAlias command
 var addAliasCmd = &cobra.Command{
-	Use:   "addAlias",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "addAlias NAME ALIAS [...NOTE]",
+	Short: "Adds alias and note to a branch that is not stored yet",
+	Long:  `Adds alias and note to a branch that is not stored yet`,
+	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("addAlias called")
+		name := args[0]
+		alias := args[1]
+		notes := args[2:]
+		notesString := ""
+		for _, note := range notes {
+			notesString += note + " "
+		}
+
+		newBranch := internal.Branch{
+			Name:  name,
+			Alias: alias,
+			Note:  notesString,
+		}
+
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		repoBranches := internal.GetRepositoryBranches()
+		if repoBranches.AliasExists(newBranch.Alias) {
+			log.Fatalln("Alias already exists. Alias must be unique")
+		}
+
+		repoBranches.AddBranch(newBranch)
+		fmt.Printf("Alias %v with note \"%v\" was added to branch %v\n", newBranch.Alias, newBranch.Note, newBranch.Name)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addAliasCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addAliasCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addAliasCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	addAliasCmd.Aliases = []string{"a"}
 }

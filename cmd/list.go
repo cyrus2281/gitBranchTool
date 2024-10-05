@@ -13,8 +13,8 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Lists all branches with their id, alias, and notes",
-	Long:  `Lists all branches with their id, alias, and notes`,
+	Short: "Lists all branches with their name, alias, and notes",
+	Long:  `Lists all branches with their name, alias, and notes`,
 	Run: func(cmd *cobra.Command, args []string) {
 		repoBranches := internal.GetRepositoryBranches()
 		for index, branch := range repoBranches.GetBranches() {
