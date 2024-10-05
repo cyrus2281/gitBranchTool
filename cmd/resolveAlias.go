@@ -1,40 +1,43 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
 // resolveAliasCmd represents the resolveAlias command
 var resolveAliasCmd = &cobra.Command{
-	Use:   "resolveAlias",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "resolveAlias ALIAS",
+	Short: "Resolves the branch name from an alias",
+	Long: `Resolves the branch name from an alias
+	
+	Example: git merge $(g r ALIAS)`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("resolveAlias called")
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		alias := args[0]
+		repoBranches := internal.GetRepositoryBranches()
+		branch, ok := repoBranches.GetBranchByAlias(alias)
+		if !ok {
+			log.Fatalf("Alias %v not found\n", alias)
+		}
+
+		fmt.Println(branch.Name)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(resolveAliasCmd)
+	resolveAliasCmd.Aliases = []string{"r"}
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// resolveAliasCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// resolveAliasCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
