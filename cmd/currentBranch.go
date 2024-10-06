@@ -1,40 +1,43 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
 // currentBranchCmd represents the currentBranch command
 var currentBranchCmd = &cobra.Command{
 	Use:   "currentBranch",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Returns the name of active branch with alias and note",
+	Long:  `Returns the name of active branch with alias and note`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("currentBranch called")
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		currentBranch, err := git.GetCurrentBranch()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		repoBranches := internal.GetRepositoryBranches()
+		branch, ok := repoBranches.GetBranchByName(currentBranch)
+		if !ok {
+			log.Fatalf("Branch \"%v\" is not registered\n", currentBranch)
+		}
+		internal.PrintTableHeader()
+		fmt.Println(branch.String())
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(currentBranchCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// currentBranchCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// currentBranchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	currentBranchCmd.Aliases = []string{"current-branch", "cb"}
 }

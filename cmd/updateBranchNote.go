@@ -1,40 +1,45 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
 // updateBranchNoteCmd represents the updateBranchNote command
 var updateBranchNoteCmd = &cobra.Command{
-	Use:   "updateBranchNote",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "updateBranchNote NAME/ALIAS [...NOTE]",
+	Short: "Adds/updates the notes for a branch base on name/alias",
+	Long:  `Adds/updates the notes for a branch base on name/alias`,
+	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("updateBranchNote called")
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		id := args[0]
+		notes := args[1:]
+		notesString := ""
+		for _, note := range notes {
+			notesString += note + " "
+		}
+		repoBranches := internal.GetRepositoryBranches()
+		branch, ok := repoBranches.GetBranchByNameOrAlias(id)
+		if !ok {
+			log.Fatalf("Branch %v not found\n", id)
+		}
+		branch.Note = notesString
+		repoBranches.UpdateBranch(branch)
+		log.Printf("Branch \"%v\" notes were updated\n", branch.Name)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(updateBranchNoteCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// updateBranchNoteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// updateBranchNoteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	updateBranchNoteCmd.Aliases = []string{"update-branch-note", "ubn"}
 }
