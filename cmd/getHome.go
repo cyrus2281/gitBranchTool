@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +20,7 @@ var getHomeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
-		home = filepath.Join(home, ".gitBranchTool_go")
+		home = filepath.Join(home, internal.HOME_NAME)
 		fmt.Println(home)
 	},
 }

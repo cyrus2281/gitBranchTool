@@ -4,10 +4,10 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -44,7 +44,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
-		home = filepath.Join(home, ".gitBranchTool_go")
+		home = filepath.Join(home, internal.HOME_NAME)
 		if _, err := os.Stat(home); os.IsNotExist(err) {
 			// Create the directory
 			err = os.Mkdir(home, 0755)
@@ -62,7 +62,5 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalln("Error reading config file:", err)
-	}
+	viper.ReadInConfig()
 }
