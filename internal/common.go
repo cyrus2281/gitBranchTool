@@ -9,6 +9,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+func AddConfig(key string, value any) error {
+	viper.Set(key, value)
+	err := viper.SafeWriteConfig()
+	return err
+}
+
 func GetHome() string {
 	gHome := viper.GetString("GIT_BRANCH_TOOL_HOME")
 	if gHome == "" {
@@ -17,8 +23,7 @@ func GetHome() string {
 			log.Fatalln(err)
 		}
 		gHome = filepath.Join(home, ".gitBranchTool_go")
-		viper.Set("GIT_BRANCH_TOOL_HOME", gHome)
-		if err := viper.SafeWriteConfig(); err != nil {
+		if err := AddConfig("GIT_BRANCH_TOOL_HOME", gHome); err != nil {
 			log.Fatalln(err)
 		}
 	}

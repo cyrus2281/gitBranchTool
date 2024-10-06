@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Cyrus Mobini
 */
 package cmd
 
@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the del command
+// deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete [...NAME|ALIAS]",
-	Short: "A brief description of your command",
+	Short: "Deletes listed branches base on name or alias",
 	Long: `Deletes listed branches base on name or alias (requires at least one name/alias)"
 
 	Without safe-delete uses the git command \"git branch -D [...NAME|ALIAS] \"
