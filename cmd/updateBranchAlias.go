@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Cyrus Mobini
 */
 package cmd
 
@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// renameCmd represents the updateBranchAlias command
+// renameCmd represents the rename command
 var renameCmd = &cobra.Command{
 	Use:   "rename NAME ALIAS",
 	Short: "Updates the alias for the given branch name",
