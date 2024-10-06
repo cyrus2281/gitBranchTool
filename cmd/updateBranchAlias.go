@@ -17,6 +17,9 @@ var renameCmd = &cobra.Command{
 	Long:    `Updates the alias for the given branch name.`,
 	Args:    cobra.ExactArgs(2),
 	Aliases: []string{"updateBranchAlias", "update-branch-alias", "uba"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return internal.GetBranches()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {

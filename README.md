@@ -6,11 +6,10 @@
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
 [![GitHub stars](https://img.shields.io/github/stars/cyrus2281/gitBranchTool?style=social)](https://github.com/cyrus2281/gitBranchTool/stargazers)
 
-**Tested and supported on: Bash, ZSH, and Git Bash**
 
 > A bash tool to facilitate managing git branches with long cryptic names with aliases
 
-The `gitBranchTool.sh` bash script adds `g` command to your terminal. This command provides additional functionalities around working with *git* branches. 
+The `gitBranchTool`, `g`, command provides additional functionalities around working with *git* branches. 
 
 If you frequently work with long branch names that include developer names, project names, issue numbers, and etc this tool is for you. With `gitBranchTool` or `g`, you'll be able to assign **alias names** for **each branch**.
 
@@ -20,87 +19,80 @@ Additionally, You can add notes to each branch to fully remember what they were 
 
 `g` also provides **auto-completion** for branch names and aliases, so you wouldn't even have to type the full alias name.
 
-On top of all these, `g` provides a **custom prompt** that displays the name of the current repository, sub-directory, branch name, and its alias. (You can turn this off if you want to use your own custom prompt).
+On top of all these, `g` provides a **custom prompt** that displays the name of the current repository, sub-directory, branch name, and its alias. (You can install this by downloading and loading the [`gCustomPrompt.sh`](./gCustomPrompt.sh) file in your `.bashrc` or `.bash_profile`)
 
 ## Installation
 
-Run the installation script using the following script:
+### Linux/Unix
 
-- To download using `curl`:
+1. Download the latest non-`.exe` binary from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
 
-```bash  
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
-```
+2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
+- A directory that is already in your PATH is `/usr/local/bin/` or `/usr/bin/`
 
-- To download using `wget`:
-
+#### Auto-Completion
+**For Bash on Linux:**
 ```bash
-bash -c "$(wget -O- https://raw.githubusercontent.com/cyrus2281/gitBranchTool/main/install.sh)"
+g completion bash > /etc/bash_completion.d/g
 ```
 
-To activate the G customized prompt, type `yes` (or press enter) when prompted. You can change this later by re-running the installation script and providing the same values except for G customized prompt, or by manually changing the `G_CUSTOMIZED_PROMPT` variable in your terminal profile file.
-
-The script will be installed in the `~/.gitBranchTool` directory. You can change this by setting the environment variable `GIT_BRANCH_TOOL_DIR` to **the absolute path** you want to install the script in before running the installation script. (This path will also be used to store the repository config files).
-
+**For Bash on MacOs:**
 ```bash
-export GIT_BRANCH_TOOL_DIR=~/.gitBranchTool; curl ...
+g completion bash > $(brew --prefix)/etc/bash_completion.d/g
 ```
 
-- Note: If you are using a custom directory, you should remember to use the same directory again or clean up manually if you're re-running the install.sh script.
+**For Zsh on Linux:**
+```bash
+g completion zsh > "${fpath[1]}/_g"
+```
 
-By default, the script will be added to your bash terminal profile (`~/.bashrc`), and ZSH terminal profile (`~/.zshrc`) if one MacOS.
+**For Zsh on MacOs:**
+```bash
+g completion zsh > $(brew --prefix)/share/zsh/site-functions/_g
+```
 
-You will be prompt if you want to load the script in any other terminal profiles. You need to provide the absolute or relative path to the terminal profile file.
-Press enter with no value to break the loop.
+### Windows (PowerShell)
+
+1. Download the latest `.exe` binary from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
+
+2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
+
+#### Auto-Completion
+To add auto-completion to your PowerShell, you can add the following to your PowerShell profile file (`$PROFILE`):
+
+```powershell
+g completion powershell | Out-String | Invoke-Expression
+```
 
 
 ## Usage:
 ```md
-The following commands can be used with gitBranchTool.
+A bash tool to facilitate managing git branches with long cryptic names with aliases
 
-   g <command> [...<args>]
+Usage:
+  g [command]
 
+Available Commands:
+  addAlias         Adds alias and note to a branch that is not stored yet
+  completion       Generate the autocompletion script for the specified shell
+  create           Creates a branch with name, alias, and note, and checks into it
+  currentBranch    Returns the name of active branch with alias and note
+  delete           Deletes listed branches base on name or alias
+  getHome          Get the gitBranchTool's home directory path
+  help             Help about any command
+  list             Lists all branches with their name, alias, and notes
+  rename           Updates the alias for the given branch name
+  resolveAlias     Resolves the branch name from an alias
+  setDefaultBranch Change the default branch, default is main
+  switch           Switches to the branch with the given name or alias
+  updateBranchNote Adds/updates the notes for a branch base on name/alias
+  updateCheck      Checks if a newer version is available
 
-*  create <id> <alias> [<note>]                   Creates a branch with id, alias, and note, and checks into it
-   c      <id> <alias> [<note>]                          Uses the git command "git checkout -b <id>"
+Flags:
+  -h, --help      help for g
+  -v, --version   version for g
 
-*  check  <id|alias>                              Checks into a branch base on an id or an alias
-   switch <id|alias>                                     Uses the git command "git checkout <id>"
-   s      <id|alias>
-   s      <unregistered-id> [<alias> <note>]      When switching to an unregistered branch, you can provide new alias
-                                                         and optional note to register it at the same time.
-
-*  del [...<id|alias>]                            Deletes listed branches base on ID or alias (requires at least one ID/alias)
-   d   [...<id|alias>]                                   Uses the git command "git branch -D [...<id>] "
-
-*  list                                           Lists all branches with their id, alias, and notes
-   l
-
-*  resolve-alias <alias>                          Resolves the branch name from an alias
-   r             <alias>
-
-*  add-alias <id> <alias> [<note>]                Adds alias and note to a branch that is not stored yet
-   a         <id> <alias> [<note>]
-
-*  update-branch-alias <id> <alias>               Updates the alias for the given branch id
-
-*  update-branch-note <id|alias> <note>           Adds/updates the notes for a branch base on id/alias
-
-*  current-branch                                 Returns the name of active branch with alias and note
-
-*  edit-repository-config                         Opens active repository config file in vim for manual editing
-
-*  update-check                                   Checks for new version of gitBranchTool and prompts for update
-
-*  help                                           Shows this help menu
-   h
-
-You can set the following parameters in your terminal profile:
-  * G_DEFAULT_BRANCH                              Default branch name, usually master or main
-  * G_CUSTOMIZED_PROMPT                           To whether customize the prompt or not
-  * G_DIRECTORY                                   Where the gitBranchTool.sh script is and where the branch info should be stored
-  * G_BRANCH_DELIMITER                            Delimiter for branch info (default '|')
-                                                    This character should not be in your branch or alias names
+Use "g [command] --help" for more information about a command.
 ```
 
 ## Contributing
@@ -108,7 +100,7 @@ You can set the following parameters in your terminal profile:
 This repository is open for contributions.
 If you have any suggestions or issues, please open an issue or a pull request.
 
-In your pull request, please include a description of the changes you made and why you made them, and update the [CHANGE_LOGS.md](./CHANGE_LOGS.md), [VERSIONS.md](./VERSIONS.md), and [README.md](./README.md) (to contributors section) files accordingly.
+In your pull request, please include a description of the changes you made and why you made them, and update the [CHANGE_LOGS.md](./CHANGE_LOGS.md), [VERSION](./VERSION), and [README.md](./README.md) (to contributors section) files accordingly.
 
 For versioning
 - Patch version: Bug fixes, performance improvements, etc.
@@ -119,7 +111,7 @@ Version need to be updated in following files (Use search and replace all):
 - [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
 - [VERSION line 1](./VERSION#L1)
 - [README.md line 3](./README.md#L3)
-- [gitBranchTool.sh line 9](./gitBranchTool.sh#L9)
+- [cmd/root.go line 22](./cmd/root.go#L22)
 
 ### Contributors
 - [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)

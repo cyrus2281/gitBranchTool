@@ -18,6 +18,11 @@ var addAliasCmd = &cobra.Command{
 	Long:    `Adds alias and note to a branch that is not stored yet`,
 	Args:    cobra.MinimumNArgs(2),
 	Aliases: []string{"a"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		a, b := internal.GetGitBranches()
+		fmt.Println(a)
+		return a, b
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		alias := args[1]

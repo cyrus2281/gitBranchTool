@@ -96,3 +96,23 @@ func (g *Git) SwitchBranch(name string) error {
 	_, err := runCommand([]string{"git", "checkout", name})
 	return err
 }
+
+func (g *Git) GetBranches() ([]string, error) {
+	output, err := runCommand([]string{"git", "branch"})
+	if err != nil {
+		return nil, err
+	}
+	branches := strings.Split(output, "\n")
+	parsedBranches := make([]string, 0, len(branches))
+	for _, branch := range branches {
+		branch = strings.TrimSpace(branch)
+		if branch == "" {
+			continue
+		}
+		if strings.HasPrefix(branch, "*") {
+			branch = strings.TrimSpace(branch[1:])
+		}
+		parsedBranches = append(parsedBranches, branch)
+	}
+	return parsedBranches, nil
+}
