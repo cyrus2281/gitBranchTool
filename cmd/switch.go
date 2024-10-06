@@ -23,6 +23,9 @@ For example:
 	g switch NAME ALIAS [...NOTE]`,
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"checkout", "check", "s"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return internal.GetAllBranchesAndAliases()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {

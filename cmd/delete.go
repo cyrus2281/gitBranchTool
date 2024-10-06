@@ -21,6 +21,9 @@ var deleteCmd = &cobra.Command{
 	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"`,
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"del", "d"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return internal.GetBranchesAndAliases()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
