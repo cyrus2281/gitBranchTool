@@ -1,40 +1,59 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
-// delCmd represents the del command
-var delCmd = &cobra.Command{
-	Use:   "del",
+// deleteCmd represents the del command
+var deleteCmd = &cobra.Command{
+	Use:   "delete [...NAME|ALIAS]",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long: `Deletes listed branches base on name or alias (requires at least one name/alias)"
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Without safe-delete uses the git command \"git branch -D [...NAME|ALIAS] \"
+	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("del called")
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		itemsToDelete := args
+		safeDelete, _ := cmd.Flags().GetBool("safe-delete")
+		ignoreErrors, _ := cmd.Flags().GetBool("ignore-errors")
+		repoBranches := internal.GetRepositoryBranches()
+
+		for _, item := range itemsToDelete {
+			branch, ok := repoBranches.GetBranchByNameOrAlias(item)
+			if !ok {
+				log.Printf("Branch/Alias \"%v\" not found\n", item)
+				continue
+			}
+			err := git.DeleteBranch(branch.Name, !safeDelete)
+			if err != nil {
+				fmt.Printf("Failed to delete branch \"%v\", %v", branch.Name, err)
+			}
+
+			if err == nil || ignoreErrors {
+				repoBranches.RemoveBranch(branch)
+				fmt.Printf("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
+			}
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(delCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// delCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// delCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.AddCommand(deleteCmd)
+	// Adding alias
+	deleteCmd.Aliases = []string{"del", "d"}
+	deleteCmd.Flags().BoolP("safe-delete", "s", false, "Safe delete branches - prevents deleting unmerged branches")
+	deleteCmd.Flags().BoolP("ignore-errors", "i", false, "Ignore if git command fails and proceeds to remove the alias from the repository")
 }
