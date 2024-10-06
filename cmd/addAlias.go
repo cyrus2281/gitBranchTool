@@ -13,10 +13,11 @@ import (
 
 // addAliasCmd represents the addAlias command
 var addAliasCmd = &cobra.Command{
-	Use:   "addAlias NAME ALIAS [...NOTE]",
-	Short: "Adds alias and note to a branch that is not stored yet",
-	Long:  `Adds alias and note to a branch that is not stored yet`,
-	Args:  cobra.MinimumNArgs(2),
+	Use:     "addAlias NAME ALIAS [...NOTE]",
+	Short:   "Adds alias and note to a branch that is not stored yet",
+	Long:    `Adds alias and note to a branch that is not stored yet`,
+	Args:    cobra.MinimumNArgs(2),
+	Aliases: []string{"a"},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		alias := args[1]
@@ -49,5 +50,4 @@ var addAliasCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(addAliasCmd)
-	addAliasCmd.Aliases = []string{"a"}
 }

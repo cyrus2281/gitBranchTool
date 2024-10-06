@@ -14,9 +14,10 @@ import (
 
 // getHomeCmd represents the getHome command
 var getHomeCmd = &cobra.Command{
-	Use:   "getHome",
-	Short: "Get the gitBranchTool's home directory path",
-	Long:  `Get the gitBranchTool's home directory path`,
+	Use:     "getHome",
+	Short:   "Get the gitBranchTool's home directory path",
+	Long:    `Get the gitBranchTool's home directory path`,
+	Aliases: []string{"home", "gh"},
 	Run: func(cmd *cobra.Command, args []string) {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
@@ -27,6 +28,4 @@ var getHomeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(getHomeCmd)
-	getHomeCmd.Aliases = []string{"home", "gh"}
-
 }

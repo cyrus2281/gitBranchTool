@@ -19,7 +19,8 @@ var createCmd = &cobra.Command{
 	Without only-create flag: "git checkout -b NAME"
 	With only-create flag: "git branch NAME"
 	`,
-	Args: cobra.MinimumNArgs(2),
+	Aliases: []string{"c"},
+	Args:    cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		alias := args[1]
@@ -63,7 +64,5 @@ var createCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(createCmd)
-	// Adding alias
-	createCmd.Aliases = []string{"c"}
 	createCmd.Flags().BoolP("only-create", "o", false, "Only create the branch, do not check into it")
 }

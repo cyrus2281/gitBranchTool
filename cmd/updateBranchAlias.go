@@ -12,10 +12,11 @@ import (
 
 // renameCmd represents the rename command
 var renameCmd = &cobra.Command{
-	Use:   "rename NAME ALIAS",
-	Short: "Updates the alias for the given branch name",
-	Long:  `Updates the alias for the given branch name.`,
-	Args:  cobra.ExactArgs(2),
+	Use:     "rename NAME ALIAS",
+	Short:   "Updates the alias for the given branch name",
+	Long:    `Updates the alias for the given branch name.`,
+	Args:    cobra.ExactArgs(2),
+	Aliases: []string{"updateBranchAlias", "update-branch-alias", "uba"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -37,5 +38,4 @@ var renameCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(renameCmd)
-	renameCmd.Aliases = []string{"updateBranchAlias", "update-branch-alias", "uba"}
 }

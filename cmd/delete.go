@@ -19,7 +19,8 @@ var deleteCmd = &cobra.Command{
 
 	Without safe-delete uses the git command \"git branch -D [...NAME|ALIAS] \"
 	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"`,
-	Args: cobra.MinimumNArgs(1),
+	Args:    cobra.MinimumNArgs(1),
+	Aliases: []string{"del", "d"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -52,8 +53,6 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-	// Adding alias
-	deleteCmd.Aliases = []string{"del", "d"}
 	deleteCmd.Flags().BoolP("safe-delete", "s", false, "Safe delete branches - prevents deleting unmerged branches")
 	deleteCmd.Flags().BoolP("ignore-errors", "i", false, "Ignore if git command fails and proceeds to remove the alias from the repository")
 }

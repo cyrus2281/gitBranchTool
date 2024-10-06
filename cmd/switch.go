@@ -21,7 +21,8 @@ Uses the git command \"git checkout NAME\"
 This command can also be used to switch to and register a new branch at the same time.
 For example:
 	g switch NAME ALIAS [...NOTE]`,
-	Args: cobra.MinimumNArgs(1),
+	Args:    cobra.MinimumNArgs(1),
+	Aliases: []string{"checkout", "check", "s"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -81,5 +82,4 @@ For example:
 
 func init() {
 	rootCmd.AddCommand(switchCmd)
-	switchCmd.Aliases = []string{"checkout", "check", "s"}
 }

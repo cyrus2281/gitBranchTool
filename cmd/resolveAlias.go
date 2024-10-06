@@ -18,7 +18,8 @@ var resolveAliasCmd = &cobra.Command{
 	Long: `Resolves the branch name from an alias
 	
 	Example: git merge $(g r ALIAS)`,
-	Args: cobra.ExactArgs(1),
+	Args:    cobra.ExactArgs(1),
+	Aliases: []string{"r"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -38,6 +39,4 @@ var resolveAliasCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(resolveAliasCmd)
-	resolveAliasCmd.Aliases = []string{"r"}
-
 }

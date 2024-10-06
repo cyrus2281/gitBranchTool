@@ -12,10 +12,11 @@ import (
 
 // setDefaultBranchCmd represents the setDefaultBranch command
 var setDefaultBranchCmd = &cobra.Command{
-	Use:   "setDefaultBranch NAME",
-	Short: "Change the default branch, default is " + internal.DEFAULT_BRANCH,
-	Long:  "Change the default branch, default is " + internal.DEFAULT_BRANCH,
-	Args:  cobra.ExactArgs(1),
+	Use:     "setDefaultBranch NAME",
+	Short:   "Change the default branch, default is " + internal.DEFAULT_BRANCH,
+	Long:    "Change the default branch, default is " + internal.DEFAULT_BRANCH,
+	Args:    cobra.ExactArgs(1),
+	Aliases: []string{"set-default-branch", "sdb"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -30,6 +31,4 @@ var setDefaultBranchCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(setDefaultBranchCmd)
-	// Adding alias
-	setDefaultBranchCmd.Aliases = []string{"set-default-branch", "sdb"}
 }
