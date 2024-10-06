@@ -5,35 +5,76 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
 // switchCmd represents the switch command
 var switchCmd = &cobra.Command{
-	Use:   "switch",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "switch NAME/ALIAS",
+	Short: "Switches to the branch with the given name or alias",
+	Long: `Switches to the branch with the given name or alias
+Uses the git command \"git checkout NAME\"
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+This command can also be used to switch to and register a new branch at the same time.
+For example:
+	g switch NAME ALIAS [...NOTE]`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("switch called")
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		id := args[0]
+		hasAlias := len(args) > 1
+		var checkoutErr error
+
+		repoBranches := internal.GetRepositoryBranches()
+		branch, ok := repoBranches.GetBranchByNameOrAlias(id)
+		if !ok {
+			// branch doesn't exist
+			checkoutErr = git.SwitchBranch(id)
+		} else {
+			checkoutErr = git.SwitchBranch(branch.Name)
+		}
+		if checkoutErr != nil {
+			fmt.Printf("Failed to switch branch to \"%v\"\n", id)
+			log.Fatalln(checkoutErr)
+		}
+		fmt.Printf("Switched to branch \"%v\"\n", id)
+
+		if hasAlias && !ok {
+			alias := args[1]
+			notes := ""
+			if len(args) > 2 {
+				for _, note := range args[2:] {
+					notes += note + " "
+				}
+			}
+
+			newBranch := internal.Branch{
+				Name:  id,
+				Alias: alias,
+				Note:  notes,
+			}
+
+			if repoBranches.AliasExists(newBranch.Alias) {
+				log.Printf("Alias \"%v\" already exists. Alias must be unique\n", newBranch.Alias)
+				return
+			}
+
+			repoBranches.AddBranch(newBranch)
+			fmt.Printf("Branch \"%v\" has been registered with alias  \"%v\"\n", newBranch.Name, newBranch.Alias)
+		} else if !hasAlias && !ok {
+			log.Printf("Branch \"%v\" is not registered with alias\n", id)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(switchCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// switchCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// switchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	switchCmd.Aliases = []string{"checkout", "check", "s"}
 }

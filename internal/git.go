@@ -91,3 +91,8 @@ func (g *Git) DeleteBranch(name string, force bool) error {
 		return err
 	}
 }
+
+func (g *Git) SwitchBranch(name string) error {
+	_, err := runCommand([]string{"git", "checkout", name})
+	return err
+}
