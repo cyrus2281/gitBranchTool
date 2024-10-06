@@ -12,10 +12,11 @@ import (
 
 // updateBranchNoteCmd represents the updateBranchNote command
 var updateBranchNoteCmd = &cobra.Command{
-	Use:   "updateBranchNote NAME/ALIAS [...NOTE]",
-	Short: "Adds/updates the notes for a branch base on name/alias",
-	Long:  `Adds/updates the notes for a branch base on name/alias`,
-	Args:  cobra.MinimumNArgs(2),
+	Use:     "updateBranchNote NAME/ALIAS [...NOTE]",
+	Short:   "Adds/updates the notes for a branch base on name/alias",
+	Long:    `Adds/updates the notes for a branch base on name/alias`,
+	Args:    cobra.MinimumNArgs(2),
+	Aliases: []string{"update-branch-note", "ubn"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -41,5 +42,4 @@ var updateBranchNoteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(updateBranchNoteCmd)
-	updateBranchNoteCmd.Aliases = []string{"update-branch-note", "ubn"}
 }

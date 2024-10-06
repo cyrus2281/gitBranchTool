@@ -13,9 +13,10 @@ import (
 
 // currentBranchCmd represents the currentBranch command
 var currentBranchCmd = &cobra.Command{
-	Use:   "currentBranch",
-	Short: "Returns the name of active branch with alias and note",
-	Long:  `Returns the name of active branch with alias and note`,
+	Use:     "currentBranch",
+	Short:   "Returns the name of active branch with alias and note",
+	Long:    `Returns the name of active branch with alias and note`,
+	Aliases: []string{"current-branch", "cb"},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
@@ -39,5 +40,4 @@ var currentBranchCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(currentBranchCmd)
-	currentBranchCmd.Aliases = []string{"current-branch", "cb"}
 }

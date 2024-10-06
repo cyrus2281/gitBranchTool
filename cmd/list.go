@@ -12,9 +12,10 @@ import (
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Lists all branches with their name, alias, and notes",
-	Long:  `Lists all branches with their name, alias, and notes`,
+	Use:     "list",
+	Short:   "Lists all branches with their name, alias, and notes",
+	Long:    `Lists all branches with their name, alias, and notes`,
+	Aliases: []string{"ls", "l"},
 	Run: func(cmd *cobra.Command, args []string) {
 		repoBranches := internal.GetRepositoryBranches()
 		internal.PrintTableHeader()
@@ -26,6 +27,4 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	// Adding alias
-	listCmd.Aliases = []string{"ls", "l"}
 }
