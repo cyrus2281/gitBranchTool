@@ -46,6 +46,11 @@ For example:
 		}
 		fmt.Printf("Switched to branch \"%v\"\n", id)
 
+		defaultBranch := repoBranches.GetDefaultBranch()
+		if defaultBranch == id {
+			return
+		}
+
 		if hasAlias && !ok {
 			alias := args[1]
 			notes := ""

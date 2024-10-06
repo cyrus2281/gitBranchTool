@@ -7,15 +7,19 @@ import (
 	"path/filepath"
 )
 
+const DEFAULT_BRANCH = "main"
+
 type RepositoryBranches struct {
 	RepositoryName string
 	StoreDirectory string
 	branches       []Branch
+	defaultBranch  string
 	loaded         bool
 }
 
 type repositoryBranchesJson struct {
-	Branches []Branch `json:"branches"`
+	Branches      []Branch `json:"branches"`
+	DefaultBranch string   `json:"defaultBranch"`
 }
 
 // Loads the persist file
@@ -38,12 +42,17 @@ func (s *RepositoryBranches) load() {
 	jsonData := repositoryBranchesJson{}
 	json.Unmarshal(content, &jsonData)
 	s.branches = jsonData.Branches
+	s.defaultBranch = jsonData.DefaultBranch
 }
 
 // Saves the persist file
 func (s *RepositoryBranches) save() {
 	repoStorePath := filepath.Join(s.StoreDirectory, s.RepositoryName+".json")
-	jsonData := repositoryBranchesJson{s.branches}
+	branchName := s.defaultBranch
+	if branchName == "" {
+		branchName = DEFAULT_BRANCH
+	}
+	jsonData := repositoryBranchesJson{s.branches, branchName}
 	jsonDataBytes, err := json.Marshal(jsonData)
 	if err != nil {
 		// Error marshalling the JSON
@@ -54,6 +63,25 @@ func (s *RepositoryBranches) save() {
 		// Error writing the file
 		log.Fatalln(err)
 	}
+}
+
+func (s *RepositoryBranches) SetDefaultBranch(branchName string) {
+	if !s.loaded {
+		s.load()
+	}
+	s.defaultBranch = branchName
+	s.save()
+}
+
+func (s *RepositoryBranches) GetDefaultBranch() string {
+	if !s.loaded {
+		s.load()
+	}
+	if s.defaultBranch == "" {
+		s.defaultBranch = DEFAULT_BRANCH
+		s.save()
+	}
+	return s.defaultBranch
 }
 
 func (s *RepositoryBranches) GetBranches() []Branch {
