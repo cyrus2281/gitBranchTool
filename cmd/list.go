@@ -17,8 +17,9 @@ var listCmd = &cobra.Command{
 	Long:  `Lists all branches with their name, alias, and notes`,
 	Run: func(cmd *cobra.Command, args []string) {
 		repoBranches := internal.GetRepositoryBranches()
+		internal.PrintTableHeader()
 		for index, branch := range repoBranches.GetBranches() {
-			println(fmt.Sprintf("%d) %v", index, branch.Print()))
+			fmt.Printf("%d) %v\n", index, branch.String())
 		}
 	},
 }

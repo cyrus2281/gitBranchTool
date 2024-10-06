@@ -1,40 +1,41 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
 
-// updateBranchAliasCmd represents the updateBranchAlias command
-var updateBranchAliasCmd = &cobra.Command{
-	Use:   "updateBranchAlias",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// renameCmd represents the updateBranchAlias command
+var renameCmd = &cobra.Command{
+	Use:   "rename NAME ALIAS",
+	Short: "Updates the alias for the given branch name",
+	Long:  `Updates the alias for the given branch name.`,
+	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("updateBranchAlias called")
+		git := internal.Git{}
+		if !git.IsGitRepo() {
+			log.Fatalln("Not a git repository")
+		}
+
+		name := args[0]
+		alias := args[1]
+		repoBranches := internal.GetRepositoryBranches()
+		branch, ok := repoBranches.GetBranchByName(name)
+		if !ok {
+			log.Fatalf("Branch %v not found\n", alias)
+		}
+		branch.Alias = alias
+		repoBranches.UpdateBranch(branch)
+		log.Printf("Branch \"%v\" alias updated to \"%v\"\n", branch.Name, alias)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(updateBranchAliasCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// updateBranchAliasCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// updateBranchAliasCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.AddCommand(renameCmd)
+	renameCmd.Aliases = []string{"updateBranchAlias", "update-branch-alias", "uba"}
 }

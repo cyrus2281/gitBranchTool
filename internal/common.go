@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,4 +38,9 @@ func GetRepositoryBranches() RepositoryBranches {
 		StoreDirectory: gHome,
 	}
 	return repoBranches
+}
+
+func PrintTableHeader() {
+	fmt.Printf("   %-20s\t%-20s\t%-20s\n", "Branch Name", "Alias", "Note")
+	fmt.Println("------------------------------------------------------------")
 }
