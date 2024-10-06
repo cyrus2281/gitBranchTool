@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"log"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -18,10 +18,12 @@ func runCommand(command []string) (string, error) {
 	cmd := exec.Command(command[0], command[1:]...)
 
 	// Run the command and capture the output
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Failed to run git command: %v", err)
-		return "", err
+		if len(output) > 0 {
+			return "", fmt.Errorf("%v", strings.TrimSpace(string(output)))
+		}
+		return "", fmt.Errorf("%v", output)
 	}
 
 	// Convert the output to a string and trim any whitespace
@@ -68,6 +70,7 @@ func (g *Git) GetRepositoryName() (string, error) {
 	return g.repositoryName, nil
 }
 
+// CreateNewBranch creates a new branch
 func (g *Git) CreateNewBranch(name string) error {
 	_, err := runCommand([]string{"git", "branch", name})
 	return err
@@ -77,4 +80,14 @@ func (g *Git) CreateNewBranch(name string) error {
 func (g *Git) SwitchToNewBranch(name string) error {
 	_, err := runCommand([]string{"git", "checkout", "-b", name})
 	return err
+}
+
+func (g *Git) DeleteBranch(name string, force bool) error {
+	if force {
+		_, err := runCommand([]string{"git", "branch", "-D", name})
+		return err
+	} else {
+		_, err := runCommand([]string{"git", "branch", "-d", name})
+		return err
+	}
 }
