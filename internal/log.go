@@ -83,98 +83,105 @@ func (l *logger) getPrefix(level int) string {
 	}
 }
 
-func (l *logger) Log(level int, message ...any) {
+func (l *logger) log(level int, ln bool, message ...any) {
 	prefix := l.getPrefix(level)
 	if prefix != "" {
 		message = append([]any{prefix}, message...)
 	}
-	if l.level <= level {
-		if level == ERROR {
-			fmt.Fprintln(l.errOutputWriter, message...)
-		} else if level == FATAL {
-			fmt.Fprintln(l.errOutputWriter, message...)
-			os.Exit(1)
+	if level >= l.level {
+		if level >= ERROR {
+			fmt.Fprint(l.errOutputWriter, message...)
 		} else {
-			fmt.Fprintln(l.outputWriter, message...)
+			fmt.Fprint(l.outputWriter, message...)
 		}
+		if ln {
+			if level >= ERROR {
+				fmt.Fprintln(l.errOutputWriter)
+			} else {
+				fmt.Fprintln(l.outputWriter)
+			}
+		}
+	}
+	if level == FATAL {
+		os.Exit(1)
 	}
 }
 
 // Log with DEBUG level
 func (l *logger) Debug(message ...any) {
-	l.Log(DEBUG, message...)
+	l.log(DEBUG, true, message...)
 }
 
 // Log with INFO level
 func (l *logger) Info(message ...any) {
-	l.Log(INFO, message...)
+	l.log(INFO, true, message...)
 }
 
 // Log with WARNING level
 func (l *logger) Warning(message ...any) {
-	l.Log(WARNING, message...)
+	l.log(WARNING, true, message...)
 }
 
 // Log with ERROR level to Error output
 func (l *logger) Error(message ...any) {
-	l.Log(ERROR, message...)
+	l.log(ERROR, true, message...)
 }
 
 // Log with FATAL level to Error output and exit with 1
 func (l *logger) Fatal(message ...any) {
-	l.Log(FATAL, message...)
+	l.log(FATAL, true, message...)
 }
 
 // Formatted log with DEBUG level
 func (l *logger) DebugF(format string, message ...any) {
-	l.Log(DEBUG, fmt.Sprintf(format, message...))
+	l.log(DEBUG, false, fmt.Sprintf(format, message...))
 }
 
 // Formatted log with INFO level
 func (l *logger) InfoF(format string, message ...any) {
-	l.Log(INFO, fmt.Sprintf(format, message...))
+	l.log(INFO, false, fmt.Sprintf(format, message...))
 }
 
 // Formatted log with WARNING level
 func (l *logger) WarningF(format string, message ...any) {
-	l.Log(WARNING, fmt.Sprintf(format, message...))
+	l.log(WARNING, false, fmt.Sprintf(format, message...))
 }
 
 // Formatted log with ERROR level to Error output
 func (l *logger) ErrorF(format string, message ...any) {
-	l.Log(ERROR, fmt.Sprintf(format, message...))
+	l.log(ERROR, false, fmt.Sprintf(format, message...))
 }
 
 // Formatted log with FATAL level to Error output and exit with 1
 func (l *logger) FatalF(format string, message ...any) {
-	l.Log(FATAL, fmt.Sprintf(format, message...))
+	l.log(FATAL, false, fmt.Sprintf(format, message...))
 }
 
 // Check error and log with ERROR level to Error output if not nil
 func (l *logger) CheckError(err error) {
 	if err != nil {
-		l.Log(ERROR, err)
+		l.log(ERROR, true, err)
 	}
 }
 
 // Check error and log with FATAL level to Error output and exit with 1 if not nil
 func (l *logger) CheckFatal(err error) {
 	if err != nil {
-		l.Log(FATAL, err)
+		l.log(FATAL, true, err)
 	}
 }
 
 // Check error and log with ERROR level to Error output if not nil
 func (l *logger) CheckErrorF(err error, format string, message ...any) {
 	if err != nil {
-		l.Log(ERROR, fmt.Sprintf(format, message...), err)
+		l.log(ERROR, false, fmt.Sprintf(format, message...), err)
 	}
 }
 
 // Check error and log with FATAL level to Error output and exit with 1 if not nil
 func (l *logger) CheckFatalF(err error, format string, message ...any) {
 	if err != nil {
-		l.Log(FATAL, fmt.Sprintf(format, message...), err)
+		l.log(FATAL, false, fmt.Sprintf(format, message...), err)
 	}
 }
 

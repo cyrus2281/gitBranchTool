@@ -28,8 +28,8 @@ __g_get_name() {
   brn=""
   branch=$(git branch 2> /dev/null | grep \* | cut -d "*" -f2 | cut -d " " -f2)
   if [[ -n $branch ]]; then
-    alias=$(g get-branch-alias $branch)
-    if [[ $? ]]; then
+    alias=$(g get-branch-alias $branch -N)
+    if [[ -n $alias ]]; then
       branch="$branch ($alias)"
     fi
     topPath="$(git rev-parse --show-toplevel)"
@@ -42,10 +42,8 @@ __g_get_name() {
   echo $brn
 }
 
-if [[ $G_CUSTOMIZED_PROMPT == true ]]; then
-  __update_prompt() {
-    PS1="$(whoami) ➤ $(__g_get_name) ❖ "
-  }
-  PROMPT_COMMAND=__update_prompt
-  precmd() { eval "$PROMPT_COMMAND"; }
-fi
+__update_prompt() {
+  PS1="$(whoami) ➤ $(__g_get_name) ❖ "
+}
+PROMPT_COMMAND=__update_prompt
+precmd() { eval "$PROMPT_COMMAND"; }
