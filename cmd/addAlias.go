@@ -4,9 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
@@ -19,9 +16,7 @@ var addAliasCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(2),
 	Aliases: []string{"a"},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		a, b := internal.GetGitBranches()
-		fmt.Println(a)
-		return a, b
+		return internal.GetGitBranches()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
@@ -40,16 +35,16 @@ var addAliasCmd = &cobra.Command{
 
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			log.Fatalln("Not a git repository")
+			internal.Logger.Fatal("Not a git repository")
 		}
 
 		repoBranches := internal.GetRepositoryBranches()
 		if repoBranches.AliasExists(newBranch.Alias) {
-			log.Fatalln("Alias already exists. Alias must be unique")
+			internal.Logger.Fatal("Alias already exists. Alias must be unique")
 		}
 
 		repoBranches.AddBranch(newBranch)
-		fmt.Printf("Alias %v with note \"%v\" was added to branch %v\n", newBranch.Alias, newBranch.Note, newBranch.Name)
+		internal.Logger.InfoF("Alias %v with note \"%v\" was added to branch %v", newBranch.Alias, newBranch.Note, newBranch.Name)
 	},
 }
 

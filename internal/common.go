@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -28,12 +27,10 @@ func GetHome() string {
 	gHome := viper.GetString("GIT_BRANCH_TOOL_HOME")
 	if gHome == "" {
 		home, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatalln(err)
-		}
+		Logger.CheckFatal(err)
 		gHome = filepath.Join(home, HOME_NAME)
 		if err := AddConfig("GIT_BRANCH_TOOL_HOME", gHome); err != nil {
-			log.Fatalln(err)
+			Logger.Fatal(err)
 		}
 	}
 	return gHome
@@ -44,9 +41,7 @@ func GetRepositoryBranches() RepositoryBranches {
 	// Get the home directory
 	gHome := GetHome()
 	repositoryName, err := git.GetRepositoryName()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	Logger.CheckFatal(err)
 	repoBranches := RepositoryBranches{
 		RepositoryName: repositoryName,
 		StoreDirectory: gHome,

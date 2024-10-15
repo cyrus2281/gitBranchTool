@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -36,7 +35,7 @@ func (s *RepositoryBranches) load() {
 	content, err := os.ReadFile(repoStorePath)
 	if err != nil {
 		// Error reading the file
-		log.Fatalln(err)
+		Logger.Fatal(err)
 	}
 	// Parse the JSON
 	jsonData := repositoryBranchesJson{}
@@ -54,15 +53,9 @@ func (s *RepositoryBranches) save() {
 	}
 	jsonData := repositoryBranchesJson{s.branches, branchName}
 	jsonDataBytes, err := json.Marshal(jsonData)
-	if err != nil {
-		// Error marshalling the JSON
-		log.Fatalln(err)
-	}
+	Logger.CheckFatal(err)
 	err = os.WriteFile(repoStorePath, jsonDataBytes, 0644)
-	if err != nil {
-		// Error writing the file
-		log.Fatalln(err)
-	}
+	Logger.CheckFatal(err)
 }
 
 func (s *RepositoryBranches) SetDefaultBranch(branchName string) {

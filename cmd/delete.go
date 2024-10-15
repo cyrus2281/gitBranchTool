@@ -4,9 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +24,7 @@ var deleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			log.Fatalln("Not a git repository")
+			internal.Logger.Fatal("Not a git repository")
 		}
 
 		itemsToDelete := args
@@ -38,17 +35,17 @@ var deleteCmd = &cobra.Command{
 		for _, item := range itemsToDelete {
 			branch, ok := repoBranches.GetBranchByNameOrAlias(item)
 			if !ok {
-				log.Printf("Branch/Alias \"%v\" not found\n", item)
+				internal.Logger.InfoF("Branch/Alias \"%v\" not found\n", item)
 				continue
 			}
 			err := git.DeleteBranch(branch.Name, !safeDelete)
 			if err != nil {
-				fmt.Printf("Failed to delete branch \"%v\", %v", branch.Name, err)
+				internal.Logger.WarningF("Failed to delete branch \"%v\", %v", branch.Name, err)
 			}
 
 			if err == nil || ignoreErrors {
 				repoBranches.RemoveBranch(branch)
-				fmt.Printf("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
+				internal.Logger.InfoF("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
 			}
 		}
 	},

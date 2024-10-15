@@ -4,9 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
@@ -38,12 +35,12 @@ var createCmd = &cobra.Command{
 
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			log.Fatalln("Not a git repository")
+			internal.Logger.Fatal("Not a git repository")
 		}
 
 		repoBranches := internal.GetRepositoryBranches()
 		if repoBranches.AliasExists(newBranch.Alias) {
-			log.Fatalln("Alias already exists. Alias must be unique")
+			internal.Logger.Fatal("Alias already exists. Alias must be unique")
 		}
 
 		createOnly, _ := cmd.Flags().GetBool("only-create")
@@ -54,11 +51,11 @@ var createCmd = &cobra.Command{
 			err = git.SwitchToNewBranch(newBranch.Name)
 		}
 		if err != nil {
-			log.Fatalln(err)
+			internal.Logger.Fatal(err)
 		}
 
 		repoBranches.AddBranch(newBranch)
-		fmt.Printf("Branch %v with alias %v was created\n", newBranch.Name, newBranch.Alias)
+		internal.Logger.InfoF("Branch %v with alias %v was created\n", newBranch.Name, newBranch.Alias)
 	},
 }
 
