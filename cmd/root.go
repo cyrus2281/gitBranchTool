@@ -22,6 +22,11 @@ var rootCmd = &cobra.Command{
 	Version: "3.0.0",
 }
 
+var (
+	verbose bool
+	noLog   bool
+)
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -32,25 +37,34 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "V", false, "verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&noLog, "no-log", "N", false, "no logs")
 	cobra.OnInitialize(initConfig)
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	// Set log level
+	if noLog {
+		internal.Logger.SetLogLevel(internal.OFF)
+	} else if verbose {
+		internal.Logger.SetLogLevel(internal.DEBUG)
+	} else {
+		internal.Logger.SetLogLevel(internal.INFO)
+	}
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		internal.Logger.CheckFatal(err)
 		home = filepath.Join(home, internal.HOME_NAME)
 		if _, err := os.Stat(home); os.IsNotExist(err) {
 			// Create the directory
 			err = os.Mkdir(home, 0755)
-			if err != nil {
-				cobra.CheckErr(err)
-			}
+			internal.Logger.CheckFatal(err)
 		}
 
 		// Search config in home directory with name ".gitBranchTool" (without extension).

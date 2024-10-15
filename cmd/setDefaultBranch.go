@@ -4,8 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"log"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
@@ -20,12 +18,12 @@ var setDefaultBranchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			log.Fatalln("Not a git repository")
+			internal.Logger.Fatal("Not a git repository")
 		}
 		name := args[0]
 		repoBranches := internal.GetRepositoryBranches()
 		repoBranches.SetDefaultBranch(name)
-		log.Printf("Default branch set to \"%v\"\n", name)
+		internal.Logger.Info("Default branch set to \"%v\"\n", name)
 	},
 }
 

@@ -4,8 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"log"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +21,7 @@ var renameCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			log.Fatalln("Not a git repository")
+			internal.Logger.Fatal("Not a git repository")
 		}
 
 		name := args[0]
@@ -31,11 +29,11 @@ var renameCmd = &cobra.Command{
 		repoBranches := internal.GetRepositoryBranches()
 		branch, ok := repoBranches.GetBranchByName(name)
 		if !ok {
-			log.Fatalf("Branch %v not found\n", alias)
+			internal.Logger.Fatal("Branch %v not found\n", name)
 		}
 		branch.Alias = alias
 		repoBranches.UpdateBranch(branch)
-		log.Printf("Branch \"%v\" alias updated to \"%v\"\n", branch.Name, alias)
+		internal.Logger.InfoF("Branch \"%v\" alias updated to \"%v\"\n", branch.Name, alias)
 	},
 }
 

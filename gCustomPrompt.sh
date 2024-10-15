@@ -28,7 +28,7 @@ __g_get_name() {
   brn=""
   branch=$(git branch 2> /dev/null | grep \* | cut -d "*" -f2 | cut -d " " -f2)
   if [[ -n $branch ]]; then
-    alias=$(g resolve-alias $branch)
+    alias=$(g get-branch-alias $branch)
     if [[ $? ]]; then
       branch="$branch ($alias)"
     fi

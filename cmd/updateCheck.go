@@ -4,8 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"log"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/spf13/cobra"
 )
@@ -19,14 +17,14 @@ var updateCheckCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		latestVersion, err := internal.FetchLatestVersion()
 		if err != nil {
-			log.Fatalf("Error fetching latest version: %v\n", err)
+			internal.Logger.FatalF("Error fetching latest version: %v\n", err)
 		}
 		currentVersion := rootCmd.Version
 		if latestVersion != currentVersion {
-			log.Printf("You are running %v, a newer version is available: %v\n", currentVersion, latestVersion)
-			log.Printf("Check the GitHub releases page for more information: %v\n", internal.GITHUB_RELEASES)
+			internal.Logger.InfoF("You are running %v, a newer version is available: %v\n", currentVersion, latestVersion)
+			internal.Logger.InfoF("Check the GitHub releases page for more information: %v\n", internal.GITHUB_RELEASES)
 		} else {
-			log.Printf("You are running the latest version: %v\n", currentVersion)
+			internal.Logger.InfoF("You are running the latest version: %v\n", currentVersion)
 		}
 	},
 }

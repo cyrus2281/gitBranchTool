@@ -20,7 +20,9 @@ var getHomeCmd = &cobra.Command{
 	Aliases: []string{"get-home", "home", "gh"},
 	Run: func(cmd *cobra.Command, args []string) {
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		if err != nil {
+			internal.Logger.Fatal(err)
+		}
 		home = filepath.Join(home, internal.HOME_NAME)
 		fmt.Println(home)
 	},
