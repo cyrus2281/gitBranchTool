@@ -35,8 +35,6 @@ func init() {
 	updateCheckCmd.Flags().BoolP("yes-to-all", "y", false, "Automatically update to the latest version")
 }
 
-const repo = "cyrus2281/gitBranchTool"
-
 type Release struct {
 	TagName string `json:"tag_name"`
 	Assets  []struct {
@@ -51,8 +49,8 @@ func checkVersionAndUpdate(yesToAll bool) {
 		internal.Logger.Fatal(err)
 	}
 
-	internal.Logger.InfoF("Current version: %s, Latest version: %s\n", internal.VERSION, latestVersion)
-	currentParts := strings.Split(internal.VERSION, ".")
+	internal.Logger.InfoF("Current version: %s, Latest version: %s\n", rootCmd.Version, latestVersion)
+	currentParts := strings.Split(rootCmd.Version, ".")
 	latestParts := strings.Split(latestVersion, ".")
 
 	if len(currentParts) != 3 || len(latestParts) != 3 {
@@ -61,7 +59,7 @@ func checkVersionAndUpdate(yesToAll bool) {
 
 	if latestParts[0] > currentParts[0] {
 		internal.Logger.Info("Major version update available. Please manually upgrade.")
-		internal.Logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", repo, latestVersion)
+		internal.Logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
 		return
 	} else if latestParts[1] > currentParts[1] || latestParts[2] > currentParts[2] {
 		downloadLatest := false
@@ -85,16 +83,16 @@ func checkVersionAndUpdate(yesToAll bool) {
 				internal.Logger.InfoF("Successfully updated to version %s\n", latestVersion)
 			}
 		}
-	} else if latestVersion == internal.VERSION {
+	} else if latestVersion == rootCmd.Version {
 		internal.Logger.Info("You're already on the latest version.")
 	} else {
 		internal.Logger.Info("You're on an unofficial version. Please check the latest release.")
-		internal.Logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", repo, latestVersion)
+		internal.Logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
 	}
 }
 
 func checkLatestRelease() (string, string, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", repo)
+	url := fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", internal.GITHUB_REPOSITORY)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", "", err
