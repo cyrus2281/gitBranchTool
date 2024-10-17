@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.1
+> Added upgrade command to update the tool to latest version, `g uc -y`
+
 ### Version 3.0.0
 > Rewrote codebase in GoLang instead of Bash
 

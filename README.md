@@ -1,11 +1,33 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.1.8-blue)
+![Version](https://img.shields.io/badge/version-v3.0.1-blue)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
 [![GitHub stars](https://img.shields.io/github/stars/cyrus2281/gitBranchTool?style=social)](https://github.com/cyrus2281/gitBranchTool/stargazers)
 
+- [gitBranchTool](#gitbranchtool)
+  - [Overview](#overview)
+  - [Installation](#installation)
+    - [Linux](#linux)
+    - [MacOS](#macos)
+    - [Windows (PowerShell)](#windows-powershell)
+  - [Auto-Completion](#auto-completion)
+    - [Linux Bash](#linux-bash)
+    - [MacOS Bash](#macos-bash)
+    - [Linux ZSH](#linux-zsh)
+    - [MacOS ZSH](#macos-zsh)
+    - [Windows PowerShell](#windows-powershell-1)
+  - [Custom Prompt](#custom-prompt)
+    - [Linux/Unix Bash](#linuxunix-bash)
+    - [Linux/Unix ZSH](#linuxunix-zsh)
+  - [Commands](#commands)
+    - [Examples](#examples)
+  - [Contributing](#contributing)
+    - [Contributors](#contributors)
+  - [License](#license)
+
+## Overview
 
 > A bash tool to facilitate managing git branches with long cryptic names with aliases
 
@@ -19,53 +41,115 @@ Additionally, You can add notes to each branch to fully remember what they were 
 
 `g` also provides **auto-completion** for branch names and aliases, so you wouldn't even have to type the full alias name.
 
-On top of all these, `g` provides a **custom prompt** that displays the name of the current repository, sub-directory, branch name, and its alias. (You can install this by downloading and loading the [`gCustomPrompt.sh`](./gCustomPrompt.sh) file in your `.bashrc` or `.bash_profile`)
+On top of all these, `g` provides a **custom prompt** that displays the name of the current repository, sub-directory, branch name, and its alias.
 
 ## Installation
 
-### Linux/Unix
+### Linux
 
-1. Download the latest non-`.exe` binary from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
+1. Download the artifact `g-linux-vX.X.X` from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
 
 2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
-- A directory that is already in your PATH is `/usr/local/bin/` or `/usr/bin/`
-
-#### Auto-Completion
-**For Bash on Linux:**
+> A directory that is already in your PATH is `/usr/local/bin/` or `/usr/bin/`
 ```bash
-g completion bash > /etc/bash_completion.d/g
+sudo mv g-linux-vX.X.X /usr/local/bin/g
 ```
 
-**For Bash on MacOs:**
+3. Ensure the binary has the correct permissions
 ```bash
-g completion bash > $(brew --prefix)/etc/bash_completion.d/g
+sudo chmod 755 /usr/local/bin/g
 ```
 
-**For Zsh on Linux:**
+### MacOS
+
+1. Download the artifact `g-macos-vX.X.X` from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
+
+2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
+> A directory that is already in your PATH is `/usr/local/bin/` or `/usr/bin/`
 ```bash
-g completion zsh > "${fpath[1]}/_g"
+sudo mv g-macos-vX.X.X /usr/local/bin/g
 ```
 
-**For Zsh on MacOs:**
+3. Ensure the binary has the correct permissions
 ```bash
-g completion zsh > $(brew --prefix)/share/zsh/site-functions/_g
+sudo chmod 755 /usr/local/bin/g
 ```
 
 ### Windows (PowerShell)
 
-1. Download the latest `.exe` binary from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
+1. Download the artifact `g-win-vX.X.X` from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
 
 2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
+> A directory that is already in your PATH is `C:\Windows\System32\`
+```powershell
+Move-Item -Path .\g-win-vX.X.X.exe -Destination C:\Windows\System32\g.exe
+```
 
-#### Auto-Completion
-To add auto-completion to your PowerShell, you can add the following to your PowerShell profile file (`$PROFILE`):
+3. Ensure the binary has the correct permissions
+```powershell
+icacls C:\Windows\System32\g.exe /grant 'Everyone:(RX)'
+```
+
+## Auto-Completion
+
+For auto-completion, you can run the following commands based on your shell:
+
+### Linux Bash
+
+```bash
+g completion bash > /etc/bash_completion.d/g
+```
+
+### MacOS Bash
+
+```bash
+echo "\nautoload -U compinit; compinit" >> ~/.bashrc
+sudo mkdir -p /etc/bash_completion.d && sudo touch /etc/bash_completion.d/_g && USER=$(whoami); sudo chown $USER /etc/bash_completion.d/_g && sudo chmod 755 /etc/bash_completion.d/_g && sudo g completion bash > "/etc/bash_completion.d/_g"
+```
+
+### Linux ZSH
+
+```bash
+sudo mkdir -p ${fpath[1]} && sudo touch ${fpath[1]}/_g && USER=$(whoami); sudo chown $USER ${fpath[1]}/_g && sudo chmod 755 ${fpath[1]}/_g && sudo g completion zsh > "${fpath[1]}/_g"
+```
+
+### MacOS ZSH
+
+```bash
+echo "\nautoload -U compinit; compinit" >> ~/.zshrc
+sudo mkdir -p ${fpath[1]} && sudo touch ${fpath[1]}/_g && USER=$(whoami); sudo chown $USER ${fpath[1]}/_g && sudo chmod 755 ${fpath[1]}/_g && sudo g completion zsh > "${fpath[1]}/_g"
+```
+
+
+### Windows PowerShell
+Add the following to your PowerShell profile file (`$PROFILE`):
 
 ```powershell
 g completion powershell | Out-String | Invoke-Expression
 ```
 
+## Custom Prompt
 
-## Usage:
+### Linux/Unix Bash
+
+Download and load the  [`gCustomPrompt.sh`](./gCustomPrompt.sh) file in your `.bashrc` or `.bash_profile`
+
+```bash
+curl -o ~/.gCustomPrompt.sh https://raw.githubusercontent.com/cyrus2281/gitBranchTool/refs/heads/main/gCustomPrompt.sh
+echo "\nsource ~/.gCustomPrompt.sh\n" >> ~/.bashrc
+```
+
+### Linux/Unix ZSH
+
+Download and load the [`gCustomPrompt.sh`](./gCustomPrompt.sh) file in your `.zshrc`
+
+```bash
+curl -o ~/.gCustomPrompt.sh https://raw.githubusercontent.com/cyrus2281/gitBranchTool/refs/heads/main/gCustomPrompt.sh
+echo "\nsource ~/.gCustomPrompt.sh\n" >> ~/.zshrc
+```
+
+
+## Commands
 ```md
 A bash tool to facilitate managing git branches with long cryptic names with aliases
 
@@ -78,6 +162,7 @@ Available Commands:
   create           Creates a branch with name, alias, and note, and checks into it
   currentBranch    Returns the name of active branch with alias and note
   delete           Deletes listed branches base on name or alias
+  getBranchAlias   Gets the branch alias
   getHome          Get the gitBranchTool's home directory path
   help             Help about any command
   list             Lists all branches with their name, alias, and notes
@@ -90,10 +175,50 @@ Available Commands:
 
 Flags:
   -h, --help      help for g
+  -N, --no-log    no logs
+  -V, --verbose   verbose output
   -v, --version   version for g
 
 Use "g [command] --help" for more information about a command.
 ```
+
+### Examples
+
+- **Create Branch**
+```bash
+g c cyrus/jira-60083 banner "Adds banner to the home page"
+```
+
+- **Add alias to existing branch**
+```bash
+g a cyrus/jira-60083 banner "Adds banner to the home page"
+```
+
+- **List all branches**
+```bash
+g l
+```
+
+- **Switch to branch**
+```bash
+g s banner
+```
+
+- **Delete branch**
+```bash
+g d banner
+```
+
+- **Delete multiple branches**
+```bash
+g d banner cyrus/jira-50930
+```
+
+- **Upgrade the tool to latest version**
+```bash
+g uc -y
+```
+
 
 ## Contributing
 
@@ -109,9 +234,8 @@ For versioning
 
 Version need to be updated in following files (Use search and replace all):
 - [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
-- [VERSION line 1](./VERSION#L1)
 - [README.md line 3](./README.md#L3)
-- [cmd/root.go line 22](./cmd/root.go#L22)
+- [internal/version.go line 3](./internal/version.go#L3)
 
 ### Contributors
 - [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)
