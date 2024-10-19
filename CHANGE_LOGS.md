@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.2
+> Refactored code base to use the new go-logger package
+
 ### Version 3.0.1
 > Added upgrade command to update the tool to latest version, `g uc -y`
 

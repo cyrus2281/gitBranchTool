@@ -97,14 +97,14 @@ For auto-completion, you can run the following commands based on your shell:
 ### Linux Bash
 
 ```bash
-g completion bash > /etc/bash_completion.d/g
+sudo mkdir -p /etc/bash_completion.d && sudo touch /etc/bash_completion.d/g && USER=$(whoami); sudo chown $USER /etc/bash_completion.d/g && sudo chmod 755 /etc/bash_completion.d/g && sudo g completion bash > /etc/bash_completion.d/g"
 ```
 
 ### MacOS Bash
 
 ```bash
 echo "\nautoload -U compinit; compinit" >> ~/.bashrc
-sudo mkdir -p /etc/bash_completion.d && sudo touch /etc/bash_completion.d/_g && USER=$(whoami); sudo chown $USER /etc/bash_completion.d/_g && sudo chmod 755 /etc/bash_completion.d/_g && sudo g completion bash > "/etc/bash_completion.d/_g"
+sudo mkdir -p /etc/bash_completion.d && sudo touch /etc/bash_completion.d/g && USER=$(whoami); sudo chown $USER /etc/bash_completion.d/g && sudo chmod 755 /etc/bash_completion.d/_g && sudo g completion bash > /etc/bash_completion.d/g"
 ```
 
 ### Linux ZSH
