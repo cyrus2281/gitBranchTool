@@ -80,12 +80,12 @@ sudo chmod 755 /usr/local/bin/g
 1. Download the artifact `g-win-vX.X.X` from the latest release [here](https://github.com/cyrus2281/gitBranchTool/releases)
 
 2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
-> A directory that is already in your PATH is `C:\Windows\System32\`
+> A directory that is already in your PATH is `C:\Windows\System32\` (you may need to run PowerShell as an administrator)
 ```powershell
 Move-Item -Path .\g-win-vX.X.X.exe -Destination C:\Windows\System32\g.exe
 ```
 
-3. Ensure the binary has the correct permissions
+3. Ensure the binary has the correct permissions (by default, the permissions are set to `Everyone: (RX)`)
 ```powershell
 icacls C:\Windows\System32\g.exe /grant 'Everyone:(RX)'
 ```
@@ -126,6 +126,11 @@ Add the following to your PowerShell profile file (`$PROFILE`):
 
 ```powershell
 g completion powershell | Out-String | Invoke-Expression
+```
+
+For default PowerShell profile file, run the following command:
+```powershell
+echo "g completion powershell | Out-String | Invoke-Expression" >> $PROFILE
 ```
 
 ## Custom Prompt
