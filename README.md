@@ -1,13 +1,13 @@
 # gitBranchTool
 
-![Version](https://img.shields.io/badge/version-v2.1.8-blue)
+[![GitHub Release](https://img.shields.io/github/v/release/cyrus2281/gitBranchTool?label=Version)](https://github.com/cyrus2281/gitBranchTool/releases/latest)
 [![License](https://img.shields.io/github/license/cyrus2281/gitBranchTool)](https://github.com/cyrus2281/gitBranchTool/blob/main/LICENSE)
 [![buyMeACoffee](https://img.shields.io/badge/BuyMeACoffee-cyrus2281-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cyrus2281)
 [![GitHub issues](https://img.shields.io/github/issues/cyrus2281/gitBranchTool?color=red)](https://github.com/cyrus2281/gitBranchTool/issues)
 [![GitHub stars](https://img.shields.io/github/stars/cyrus2281/gitBranchTool?style=social)](https://github.com/cyrus2281/gitBranchTool/stargazers)
 
 
-> A bash tool to facilitate managing git branches with long cryptic names with aliases
+> **A bash tool to facilitate managing git branches with long cryptic names with aliases**
 
 The `gitBranchTool`, `g`, command provides additional functionalities around working with *git* branches. 
 
@@ -108,10 +108,8 @@ For versioning
 - Major version: Major breaking changes, change of interface, backward incompatible changes
 
 Version need to be updated in following files (Use search and replace all):
-- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
-- [VERSION line 1](./VERSION#L1)
-- [README.md line 3](./README.md#L3)
 - [cmd/root.go line 22](./cmd/root.go#L22)
+- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
 
 ### Contributors
 - [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)

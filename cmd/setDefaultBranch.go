@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -18,12 +19,12 @@ var setDefaultBranchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 		name := args[0]
 		repoBranches := internal.GetRepositoryBranches()
 		repoBranches.SetDefaultBranch(name)
-		internal.Logger.Info("Default branch set to \"%v\"\n", name)
+		logger.Infoln("Default branch set to \"%v\"\n", name)
 	},
 }
 
