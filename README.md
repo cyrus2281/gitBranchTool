@@ -171,6 +171,7 @@ Available Commands:
   getHome          Get the gitBranchTool's home directory path
   help             Help about any command
   list             Lists all branches with their name, alias, and notes
+  removeEntry      Removes a registered branch entry without deleting the branch
   rename           Updates the alias for the given branch name
   resolveAlias     Resolves the branch name from an alias
   setDefaultBranch Change the default branch, default is main
