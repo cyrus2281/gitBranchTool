@@ -118,6 +118,18 @@ func (s *RepositoryBranches) AliasExists(alias string) bool {
 	return false
 }
 
+func (s *RepositoryBranches) BranchWithAliasExists(alias string) bool {
+	if !s.loaded {
+		s.load()
+	}
+	for _, b := range s.branches {
+		if b.Name == alias {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *RepositoryBranches) GetBranchByAlias(alias string) (Branch, bool) {
 	if !s.loaded {
 		s.load()

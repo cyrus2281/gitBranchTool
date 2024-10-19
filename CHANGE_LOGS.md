@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.3
+> Added removeEntry command + Added safe check around ensuring alias uniqueness
+
 ### Version 3.0.2
 > Refactored code base to use the new go-logger package
 

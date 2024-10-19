@@ -134,7 +134,7 @@ func getAssetPrefix(version string) string {
 	case "darwin":
 		return fmt.Sprintf("g-macos-v%s", version)
 	case "windows":
-		return fmt.Sprintf("g.win-v%s.exe", version)
+		return fmt.Sprintf("g-win-v%s.exe", version)
 	default:
 		return ""
 	}

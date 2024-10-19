@@ -15,7 +15,7 @@ var renameCmd = &cobra.Command{
 	Short:   "Updates the alias for the given branch name",
 	Long:    `Updates the alias for the given branch name.`,
 	Args:    cobra.ExactArgs(2),
-	Aliases: []string{"updateBranchAlias", "update-branch-alias", "uba"},
+	Aliases: []string{"mv", "updateBranchAlias", "update-branch-alias", "uba"},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return internal.GetBranches()
 	},
@@ -32,6 +32,13 @@ var renameCmd = &cobra.Command{
 		if !ok {
 			logger.Fatalln("Branch %v not found\n", name)
 		}
+		if repoBranches.AliasExists(alias) {
+			logger.Fatalln("Alias already exists. Alias must be unique.")
+		}
+		if repoBranches.BranchWithAliasExists(alias) {
+			logger.FatalF("A branch with name \"%s\" already exists. Alias must be unique.\n", alias)
+		}
+
 		branch.Alias = alias
 		repoBranches.UpdateBranch(branch)
 		logger.InfoF("Branch \"%v\" alias updated to \"%v\"\n", branch.Name, alias)

@@ -41,7 +41,10 @@ var createCmd = &cobra.Command{
 
 		repoBranches := internal.GetRepositoryBranches()
 		if repoBranches.AliasExists(newBranch.Alias) {
-			logger.Fatalln("Alias already exists. Alias must be unique")
+			logger.Fatalln("Alias already exists. Alias must be unique.")
+		}
+		if repoBranches.BranchWithAliasExists(newBranch.Alias) {
+			logger.FatalF("A branch with name \"%s\" already exists. Alias must be unique.\n", newBranch.Alias)
 		}
 
 		createOnly, _ := cmd.Flags().GetBool("only-create")
