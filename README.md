@@ -233,10 +233,8 @@ For versioning
 - Major version: Major breaking changes, change of interface, backward incompatible changes
 
 Version need to be updated in following files (Use search and replace all):
-- [cmd/root.go line 22](./cmd/root.go#L22)
-- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
-- [README.md line 3](./README.md#L3)
 - [internal/version.go line 3](./internal/version.go#L3)
+- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
 
 ### Contributors
 - [Cyrus Mobini (@cyrus2281)](https://github.com/cyrus2281)
