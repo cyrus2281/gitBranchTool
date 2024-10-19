@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -35,16 +36,16 @@ var addAliasCmd = &cobra.Command{
 
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 
 		repoBranches := internal.GetRepositoryBranches()
 		if repoBranches.AliasExists(newBranch.Alias) {
-			internal.Logger.Fatal("Alias already exists. Alias must be unique")
+			logger.Fatalln("Alias already exists. Alias must be unique")
 		}
 
 		repoBranches.AddBranch(newBranch)
-		internal.Logger.InfoF("Alias %v with note \"%v\" was added to branch %v", newBranch.Alias, newBranch.Note, newBranch.Name)
+		logger.InfoF("Alias %v with note \"%v\" was added to branch %v\n", newBranch.Alias, newBranch.Note, newBranch.Name)
 	},
 }
 

@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,7 @@ For example:
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 
 		id := args[0]
@@ -42,10 +43,10 @@ For example:
 			checkoutErr = git.SwitchBranch(branch.Name)
 		}
 		if checkoutErr != nil {
-			internal.Logger.ErrorF("Failed to switch branch to \"%v\"\n", id)
-			internal.Logger.Fatal(checkoutErr)
+			logger.ErrorF("Failed to switch branch to \"%v\"\n", id)
+			logger.Fatalln(checkoutErr)
 		}
-		internal.Logger.InfoF("Switched to branch \"%v\"\n", id)
+		logger.InfoF("Switched to branch \"%v\"\n", id)
 
 		defaultBranch := repoBranches.GetDefaultBranch()
 		if defaultBranch == id {
@@ -68,14 +69,14 @@ For example:
 			}
 
 			if repoBranches.AliasExists(newBranch.Alias) {
-				internal.Logger.WarningF("Alias \"%v\" already exists. Alias must be unique\n", newBranch.Alias)
+				logger.WarningF("Alias \"%v\" already exists. Alias must be unique\n", newBranch.Alias)
 				return
 			}
 
 			repoBranches.AddBranch(newBranch)
-			internal.Logger.InfoF("Branch \"%v\" has been registered with alias  \"%v\"\n", newBranch.Name, newBranch.Alias)
+			logger.InfoF("Branch \"%v\" has been registered with alias  \"%v\"\n", newBranch.Name, newBranch.Alias)
 		} else if !hasAlias && !ok {
-			internal.Logger.WarningF("Branch \"%v\" is not registered with alias\n", id)
+			logger.WarningF("Branch \"%v\" is not registered with alias\n", id)
 		}
 	},
 }

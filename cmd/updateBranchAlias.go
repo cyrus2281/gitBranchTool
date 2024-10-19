@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ var renameCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 
 		name := args[0]
@@ -29,11 +30,11 @@ var renameCmd = &cobra.Command{
 		repoBranches := internal.GetRepositoryBranches()
 		branch, ok := repoBranches.GetBranchByName(name)
 		if !ok {
-			internal.Logger.Fatal("Branch %v not found\n", name)
+			logger.Fatalln("Branch %v not found\n", name)
 		}
 		branch.Alias = alias
 		repoBranches.UpdateBranch(branch)
-		internal.Logger.InfoF("Branch \"%v\" alias updated to \"%v\"\n", branch.Name, alias)
+		logger.InfoF("Branch \"%v\" alias updated to \"%v\"\n", branch.Name, alias)
 	},
 }
 

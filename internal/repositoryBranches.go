@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/cyrus2281/go-logger"
 )
 
 const DEFAULT_BRANCH = "main"
@@ -35,7 +37,7 @@ func (s *RepositoryBranches) load() {
 	content, err := os.ReadFile(repoStorePath)
 	if err != nil {
 		// Error reading the file
-		Logger.Fatal(err)
+		logger.Fatalln(err)
 	}
 	// Parse the JSON
 	jsonData := repositoryBranchesJson{}
@@ -53,9 +55,9 @@ func (s *RepositoryBranches) save() {
 	}
 	jsonData := repositoryBranchesJson{s.branches, branchName}
 	jsonDataBytes, err := json.Marshal(jsonData)
-	Logger.CheckFatal(err)
+	logger.CheckFatalln(err)
 	err = os.WriteFile(repoStorePath, jsonDataBytes, 0644)
-	Logger.CheckFatal(err)
+	logger.CheckFatalln(err)
 }
 
 func (s *RepositoryBranches) SetDefaultBranch(branchName string) {

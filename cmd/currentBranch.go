@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -19,16 +20,16 @@ var currentBranchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 
 		currentBranch, err := git.GetCurrentBranch()
-		internal.Logger.CheckFatal(err)
+		logger.CheckFatalln(err)
 
 		repoBranches := internal.GetRepositoryBranches()
 		branch, ok := repoBranches.GetBranchByName(currentBranch)
 		if !ok {
-			internal.Logger.FatalF("Branch \"%v\" is not registered\n", currentBranch)
+			logger.FatalF("Branch \"%v\" is not registered\n", currentBranch)
 		}
 		internal.PrintTableHeader()
 		fmt.Println(branch.String())

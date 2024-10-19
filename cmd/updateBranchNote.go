@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ var updateBranchNoteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 
 		id := args[0]
@@ -33,11 +34,11 @@ var updateBranchNoteCmd = &cobra.Command{
 		repoBranches := internal.GetRepositoryBranches()
 		branch, ok := repoBranches.GetBranchByNameOrAlias(id)
 		if !ok {
-			internal.Logger.FatalF("Branch %v not found\n", id)
+			logger.FatalF("Branch %v not found\n", id)
 		}
 		branch.Note = notesString
 		repoBranches.UpdateBranch(branch)
-		internal.Logger.InfoF("Branch \"%v\" notes were updated\n", branch.Name)
+		logger.InfoF("Branch \"%v\" notes were updated\n", branch.Name)
 	},
 }
 

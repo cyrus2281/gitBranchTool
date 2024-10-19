@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -20,14 +21,14 @@ var getBranchAliasCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {
-			internal.Logger.Fatal("Not a git repository")
+			logger.Fatalln("Not a git repository")
 		}
 
 		name := args[0]
 		repoBranches := internal.GetRepositoryBranches()
 		branch, ok := repoBranches.GetBranchByName(name)
 		if !ok {
-			internal.Logger.FatalF("Branch %v not found\n", name)
+			logger.FatalF("Branch %v not found\n", name)
 		}
 
 		fmt.Println(branch.Alias)

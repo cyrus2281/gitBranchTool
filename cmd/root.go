@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -46,11 +47,11 @@ func init() {
 func initConfig() {
 	// Set log level
 	if noLog {
-		internal.Logger.SetLogLevel(internal.OFF)
+		logger.SetLogLevel(logger.OFF)
 	} else if verbose {
-		internal.Logger.SetLogLevel(internal.DEBUG)
+		logger.SetLogLevel(logger.DEBUG)
 	} else {
-		internal.Logger.SetLogLevel(internal.INFO)
+		logger.SetLogLevel(logger.INFO)
 	}
 
 	if cfgFile != "" {
@@ -59,12 +60,12 @@ func initConfig() {
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
-		internal.Logger.CheckFatal(err)
+		logger.CheckFatalln(err)
 		home = filepath.Join(home, internal.HOME_NAME)
 		if _, err := os.Stat(home); os.IsNotExist(err) {
 			// Create the directory
 			err = os.Mkdir(home, 0755)
-			internal.Logger.CheckFatal(err)
+			logger.CheckFatalln(err)
 		}
 
 		// Search config in home directory with name ".gitBranchTool" (without extension).

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ var getHomeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			internal.Logger.Fatal(err)
+			logger.Fatalln(err)
 		}
 		home = filepath.Join(home, internal.HOME_NAME)
 		fmt.Println(home)

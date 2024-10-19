@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -46,28 +47,28 @@ type Release struct {
 func checkVersionAndUpdate(yesToAll bool) {
 	latestVersion, downloadURL, err := checkLatestRelease()
 	if err != nil {
-		internal.Logger.Fatal(err)
+		logger.Fatalln(err)
 	}
 
-	internal.Logger.InfoF("Current version: %s, Latest version: %s\n", rootCmd.Version, latestVersion)
+	logger.InfoF("Current version: %s, Latest version: %s\n", rootCmd.Version, latestVersion)
 	currentParts := strings.Split(rootCmd.Version, ".")
 	latestParts := strings.Split(latestVersion, ".")
 
 	if len(currentParts) != 3 || len(latestParts) != 3 {
-		internal.Logger.Fatal("Version format error")
+		logger.Fatalln("Version format error")
 	}
 
 	if latestParts[0] > currentParts[0] {
-		internal.Logger.Info("Major version update available. Please manually upgrade.")
-		internal.Logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
+		logger.Infoln("Major version update available. Please manually upgrade.")
+		logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
 		return
 	} else if latestParts[1] > currentParts[1] || latestParts[2] > currentParts[2] {
 		downloadLatest := false
 		if yesToAll {
-			internal.Logger.Info("Updating to the latest version...")
+			logger.Infoln("Updating to the latest version...")
 			downloadLatest = true
 		} else {
-			internal.Logger.InfoF("New version available: %s. Would you like to update? (y/[n]): ", latestVersion)
+			logger.InfoF("New version available: %s. Would you like to update? (y/[n]): ", latestVersion)
 			reader := bufio.NewReader(os.Stdin)
 			input, _ := reader.ReadString('\n')
 			input = strings.ToLower(strings.TrimSpace(input))
@@ -78,16 +79,16 @@ func checkVersionAndUpdate(yesToAll bool) {
 
 		if downloadLatest {
 			if err := downloadAndReplace(downloadURL, latestVersion); err != nil {
-				internal.Logger.Fatal("Error updating: ", err)
+				logger.Fatalln("Error updating: ", err)
 			} else {
-				internal.Logger.InfoF("Successfully updated to version %s\n", latestVersion)
+				logger.InfoF("Successfully updated to version %s\n", latestVersion)
 			}
 		}
 	} else if latestVersion == rootCmd.Version {
-		internal.Logger.Info("You're already on the latest version.")
+		logger.Infoln("You're already on the latest version.")
 	} else {
-		internal.Logger.Info("You're on an unofficial version. Please check the latest release.")
-		internal.Logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
+		logger.Infoln("You're on an unofficial version. Please check the latest release.")
+		logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
 	}
 }
 

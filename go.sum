@@ -1,4 +1,6 @@
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
+github.com/cyrus2281/go-logger v1.1.0 h1:3VB6L/PFQfIRcxI39Bk21QxpdpIEKGx2OGsgDKips+c=
+github.com/cyrus2281/go-logger v1.1.0/go.mod h1:PpRQHcbv5ARLuLKcrD15AkCD4gcjya6Q3cjNmYaUj6k=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=

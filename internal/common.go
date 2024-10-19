@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/viper"
 )
 
@@ -24,10 +25,10 @@ func GetHome() string {
 	gHome := viper.GetString("GIT_BRANCH_TOOL_HOME")
 	if gHome == "" {
 		home, err := os.UserHomeDir()
-		Logger.CheckFatal(err)
+		logger.CheckFatalln(err)
 		gHome = filepath.Join(home, HOME_NAME)
 		if err := AddConfig("GIT_BRANCH_TOOL_HOME", gHome); err != nil {
-			Logger.Fatal(err)
+			logger.Fatalln(err)
 		}
 	}
 	return gHome
@@ -38,7 +39,7 @@ func GetRepositoryBranches() RepositoryBranches {
 	// Get the home directory
 	gHome := GetHome()
 	repositoryName, err := git.GetRepositoryName()
-	Logger.CheckFatal(err)
+	logger.CheckFatalln(err)
 	repoBranches := RepositoryBranches{
 		RepositoryName: repositoryName,
 		StoreDirectory: gHome,
