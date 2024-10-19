@@ -45,7 +45,7 @@ var addAliasCmd = &cobra.Command{
 		}
 
 		repoBranches.AddBranch(newBranch)
-		logger.InfoF("Alias %v with note \"%v\" was added to branch %v", newBranch.Alias, newBranch.Note, newBranch.Name)
+		logger.InfoF("Alias %v with note \"%v\" was added to branch %v\n", newBranch.Alias, newBranch.Note, newBranch.Name)
 	},
 }
 

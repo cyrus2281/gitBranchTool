@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Use:     "g",
 	Short:   "A bash tool to facilitate managing git branches with long cryptic names with aliases",
 	Long:    `A bash tool to facilitate managing git branches with long cryptic names with aliases`,
-	Version: "3.0.0",
+	Version: internal.VERSION,
 }
 
 var (

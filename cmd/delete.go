@@ -41,7 +41,7 @@ var deleteCmd = &cobra.Command{
 			}
 			err := git.DeleteBranch(branch.Name, !safeDelete)
 			if err != nil {
-				logger.WarningF("Failed to delete branch \"%v\", %v", branch.Name, err)
+				logger.WarningF("Failed to delete branch \"%v\", %v\n", branch.Name, err)
 			}
 
 			if err == nil || ignoreErrors {
