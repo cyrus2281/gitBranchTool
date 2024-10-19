@@ -40,12 +40,18 @@ var addAliasCmd = &cobra.Command{
 		}
 
 		repoBranches := internal.GetRepositoryBranches()
+		if repoBranches.BranchExists(newBranch) {
+			logger.Fatalln("Branch is already registered. Consider using the rename command.")
+		}
 		if repoBranches.AliasExists(newBranch.Alias) {
-			logger.Fatalln("Alias already exists. Alias must be unique")
+			logger.Fatalln("Alias already exists. Alias must be unique.")
+		}
+		if repoBranches.BranchWithAliasExists(newBranch.Alias) {
+			logger.FatalF("A branch with name \"%s\" already exists. Alias must be unique.\n", newBranch.Alias)
 		}
 
 		repoBranches.AddBranch(newBranch)
-		logger.InfoF("Alias %v with note \"%v\" was added to branch %v\n", newBranch.Alias, newBranch.Note, newBranch.Name)
+		logger.InfoF("Alias %v with note \"%v\" was added to branch %v.\n", newBranch.Alias, newBranch.Note, newBranch.Name)
 	},
 }
 
