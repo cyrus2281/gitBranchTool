@@ -82,7 +82,7 @@ sudo chmod 755 /usr/local/bin/g
 2. Add the binary to your PATH environment variable (or to a directory that is already in your PATH)
 > A directory that is already in your PATH is `C:\Windows\System32\` (you may need to run PowerShell as an administrator)
 ```powershell
-Move-Item -Path .\g-win-vX.X.X.exe -Destination C:\Windows\System32\g.exe
+Move-Item -Force -Path .\g-win-vX.X.X.exe -Destination C:\Windows\System32\g.exe
 ```
 
 3. Ensure the binary has the correct permissions (by default, the permissions are set to `Everyone: (RX)`)

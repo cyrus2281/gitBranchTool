@@ -80,8 +80,6 @@ func checkVersionAndUpdate(yesToAll bool) {
 		if downloadLatest {
 			if err := downloadAndReplace(downloadURL, latestVersion); err != nil {
 				logger.Fatalln("Error updating: ", err)
-			} else {
-				logger.InfoF("Successfully updated to version %s\n", latestVersion)
 			}
 		}
 	} else if latestVersion == rootCmd.Version {
@@ -163,33 +161,58 @@ func downloadAndReplace(downloadURL, version string) error {
 	}
 
 	// Find current executable path
-	whichG := exec.Command("which", "g")
-	pathBytes, err := whichG.Output()
+	executablePath, err := os.Executable()
 	if err != nil {
 		return err
 	}
 
-	executablePath := strings.TrimSpace(string(pathBytes))
-
-	// Rename and replace
-	if runtime.GOOS == "windows" {
-		executablePath += ".exe"
+	// If the OS is not Windows, update the binary directly
+	if runtime.GOOS != "windows" {
+		return nonWindowBinaryUpdate(tempFile.Name(), executablePath)
+	} else {
+		// PowerShell doesn't allow renaming the running executable
+		return windowBinaryUpdate(tempFile.Name(), executablePath)
 	}
+}
 
-	if err := os.Rename(tempFile.Name(), executablePath); err != nil {
+func nonWindowBinaryUpdate(tempPath, executablePath string) error {
+	if err := os.Rename(tempPath, executablePath); err != nil {
 		// If the error has permission denied
 		if strings.Contains(err.Error(), "permission denied") {
-			return fmt.Errorf("permission denied. Please run with sudo or as an administrator")
+			return fmt.Errorf("permission denied. Please run with sudo")
 		}
 		return err
 	}
 
 	// Set executable permission for Unix-based systems
-	if runtime.GOOS != "windows" {
-		if err := os.Chmod(executablePath, 0755); err != nil {
-			return err
-		}
+	if err := os.Chmod(executablePath, 0755); err != nil {
+		return err
 	}
 
+	logger.Infoln("Successfully updated to latest version")
+	return nil
+}
+
+func windowBinaryUpdate(tempPath, executablePath string) error {
+	// PowerShell doesn't allow renaming the running executable
+	// So we need to create a batch script to rename the executable
+	batchScript := fmt.Sprintf(`@echo off
+timeout /t 2 /nobreak > NUL
+move /Y "%s" "%s"
+exit
+`, tempPath, executablePath)
+
+	batchPath := executablePath + ".bat"
+	if err := os.WriteFile(batchPath, []byte(batchScript), 0755); err != nil {
+		return err
+	}
+
+	// Run the batch script
+	cmd := exec.Command("cmd", "/C", batchPath)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	logger.Infoln("Successfully updated to latest version")
 	return nil
 }
