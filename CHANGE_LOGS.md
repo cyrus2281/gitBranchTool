@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.4
+> Fixed updated binary issue in PowerShell Windows
+
 ### Version 3.0.3
 > Added removeEntry command + Added safe check around ensuring alias uniqueness
 

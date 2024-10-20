@@ -9,7 +9,8 @@ VERSION=$(grep 'const VERSION =' "$FILE_PATH" | sed -E 's/.*"([^"]+)".*/\1/')
 # Print the version string
 echo "Building for version $VERSION"
 
-# Create bin directory if it doesn't exist
+# Create bin directory
+rm -rf bin
 mkdir -p bin
 
 # Build for all platforms
