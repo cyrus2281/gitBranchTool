@@ -24,6 +24,7 @@ var addAliasCmd = &cobra.Command{
 		alias := args[1]
 		notes := args[2:]
 		notesString := ""
+
 		for _, note := range notes {
 			notesString += note + " "
 		}
@@ -41,7 +42,7 @@ var addAliasCmd = &cobra.Command{
 
 		repoBranches := internal.GetRepositoryBranches()
 		if repoBranches.BranchExists(newBranch) {
-			logger.Fatalln("Branch is already registered. Consider using the rename command.")
+			logger.Fatalln("Branch is already registered. Consider using the 'rename' command.")
 		}
 		if repoBranches.AliasExists(newBranch.Alias) {
 			logger.Fatalln("Alias already exists. Alias must be unique.")
@@ -49,10 +50,28 @@ var addAliasCmd = &cobra.Command{
 		if repoBranches.BranchWithAliasExists(newBranch.Alias) {
 			logger.FatalF("A branch with name \"%s\" already exists. Alias must be unique.\n", newBranch.Alias)
 		}
+		if !checkGitBranchExists(newBranch.Name, git) {
+			logger.Fatalln("Branch does not exist in the repository. Consider using the 'create' command.")
+		}
 
 		repoBranches.AddBranch(newBranch)
 		logger.InfoF("Alias %v with note \"%v\" was added to branch %v.\n", newBranch.Alias, newBranch.Note, newBranch.Name)
 	},
+}
+
+func checkGitBranchExists(branchName string, git internal.Git) bool {
+	branches, err := git.GetBranches()
+	if err != nil {
+		logger.Fatalln(err)
+	}
+
+	for _, branch := range branches {
+		if branch == branchName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func init() {

@@ -31,6 +31,7 @@ func GetHome() string {
 			logger.Fatalln(err)
 		}
 	}
+	logger.Debugln("Home: ", gHome)
 	return gHome
 }
 
