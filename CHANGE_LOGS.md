@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.6
+> Add prompt string command
+
 ### Version 3.0.5
 > Added a check to ensure branch exists before adding an alias to it
 

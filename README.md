@@ -19,8 +19,6 @@
     - [MacOS ZSH](#macos-zsh)
     - [Windows PowerShell](#windows-powershell-1)
   - [Custom Prompt](#custom-prompt)
-    - [Linux/Unix Bash](#linuxunix-bash)
-    - [Linux/Unix ZSH](#linuxunix-zsh)
   - [Commands](#commands)
     - [Examples](#examples)
   - [Contributing](#contributing)
@@ -135,23 +133,14 @@ echo "g completion powershell | Out-String | Invoke-Expression" >> $PROFILE
 
 ## Custom Prompt
 
-### Linux/Unix Bash
-
-Download and load the  [`gCustomPrompt.sh`](./gCustomPrompt.sh) file in your `.bashrc` or `.bash_profile`
-
-```bash
-curl -o ~/.gCustomPrompt.sh https://raw.githubusercontent.com/cyrus2281/gitBranchTool/refs/heads/main/gCustomPrompt.sh
-echo "\nsource ~/.gCustomPrompt.sh\n" >> ~/.bashrc
-```
-
-### Linux/Unix ZSH
-
-Download and load the [`gCustomPrompt.sh`](./gCustomPrompt.sh) file in your `.zshrc`
+Run the following command to your terminal profile to add the gitBranchTool custom prompt. 
+- Change `.bashrc` with `.zshrc` if you use ZSH, or the profile file you use if it's different.
 
 ```bash
-curl -o ~/.gCustomPrompt.sh https://raw.githubusercontent.com/cyrus2281/gitBranchTool/refs/heads/main/gCustomPrompt.sh
-echo "\nsource ~/.gCustomPrompt.sh\n" >> ~/.zshrc
+echo -e "\nPROMPT_COMMAND='export PS1=\"\$(g _ps)\"'\nprecmd() { eval \"\$PROMPT_COMMAND\"; }" >> ~/.bashrc
 ```
+
+- Custom prompt is not supported in Windows PowerShell yet.
 
 
 ## Commands
