@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -53,6 +52,6 @@ func GetRepositoryBranches() RepositoryBranches {
 }
 
 func PrintTableHeader() {
-	fmt.Printf("   %-20s\t%-20s\t%-20s\n", "Branch Name", "Alias", "Note")
-	fmt.Println("------------------------------------------------------------")
+	logger.InfoF("   %-20s\t%-20s\t%-20s\n", "Branch Name", "Alias", "Note")
+	logger.Infoln("------------------------------------------------------------")
 }

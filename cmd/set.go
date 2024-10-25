@@ -50,7 +50,7 @@ Default is nothing (Run command with no argument to remove prefix)
 
 			repoBranches := internal.GetRepositoryBranches()
 			repoBranches.SetDefaultBranch(name)
-			logger.InfoF("Default branch set to \"%v\"\n", name)
+			logger.InfoF("Default branch for the repository \"%v\" set to \"%v\"\n", repoBranches.RepositoryName, name)
 		case "local-prefix":
 			git := internal.Git{}
 			if !git.IsGitRepo() {
