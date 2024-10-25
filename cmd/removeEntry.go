@@ -15,6 +15,13 @@ var removeEntryCmd = &cobra.Command{
 	Short:   "Removes a registered branch entry without deleting the branch",
 	Long:    `Removes a registered branch entry without deleting the branch",`,
 	Aliases: []string{"remove-entry", "re"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		position := len(args) + 1
+		if position == 1 {
+			return internal.GetBranchesAndAliases()
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {

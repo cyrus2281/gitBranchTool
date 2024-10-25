@@ -17,6 +17,9 @@ var currentBranchCmd = &cobra.Command{
 	Short:   "Returns the name of active branch with alias and note",
 	Long:    `Returns the name of active branch with alias and note`,
 	Aliases: []string{"current-branch", "cb"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {

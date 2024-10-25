@@ -17,7 +17,11 @@ var addAliasCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(2),
 	Aliases: []string{"a"},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return internal.GetGitBranches()
+		position := len(args) + 1
+		if position == 1 {
+			return internal.GetGitBranches()
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]

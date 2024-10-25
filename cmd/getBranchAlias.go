@@ -17,7 +17,14 @@ var getBranchAliasCmd = &cobra.Command{
 	Short:   "Gets the branch alias",
 	Long:    `Gets the branch alias`,
 	Args:    cobra.ExactArgs(1),
-	Aliases: []string{"get-branch-alias", "g"},
+	Aliases: []string{"get-branch-alias", "gbr"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		position := len(args) + 1
+		if position == 1 {
+			return internal.GetBranches()
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}
 		if !git.IsGitRepo() {

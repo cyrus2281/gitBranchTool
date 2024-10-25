@@ -17,7 +17,11 @@ var renameCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(2),
 	Aliases: []string{"mv", "updateBranchAlias", "update-branch-alias", "uba"},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return internal.GetBranches()
+		position := len(args) + 1
+		if position == 1 {
+			return internal.GetBranches()
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}

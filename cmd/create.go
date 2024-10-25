@@ -19,6 +19,9 @@ var createCmd = &cobra.Command{
 	`,
 	Aliases: []string{"c"},
 	Args:    cobra.MinimumNArgs(2),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		alias := args[1]

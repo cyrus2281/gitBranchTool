@@ -19,6 +19,9 @@ var getHomeCmd = &cobra.Command{
 	Short:   "Get the gitBranchTool's home directory path",
 	Long:    `Get the gitBranchTool's home directory path`,
 	Aliases: []string{"get-home", "home", "gh"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		home, err := os.UserHomeDir()
 		if err != nil {
