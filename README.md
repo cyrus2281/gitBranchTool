@@ -162,8 +162,8 @@ Available Commands:
   create           Creates a branch with name, alias, and note, and checks into it
   currentBranch    Returns the name of active branch with alias and note
   delete           Deletes listed branches base on name or alias
+  get              Get configuration options (Run `g get --help` for more information)
   getBranchAlias   Gets the branch alias
-  getHome          Get the gitBranchTool's home directory path
   help             Help about any command
   list             Lists all branches with their name, alias, and notes
   removeEntry      Removes a registered branch entry without deleting the branch

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
+	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +24,8 @@ var listCmd = &cobra.Command{
 		repoBranches := internal.GetRepositoryBranches()
 		internal.PrintTableHeader()
 		for index, branch := range repoBranches.GetBranches() {
-			fmt.Printf("%d) %v\n", index, branch.String())
+			logger.InfoF("%d) ", index)
+			fmt.Println(branch.String())
 		}
 	},
 }
