@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.8
+> Added PowerShell Custom Prompt support + fixed completion repetition issue 
+
 ### Version 3.0.7
 > Added set command with local and global branch prefix & moved setDefaultBranch to here
 

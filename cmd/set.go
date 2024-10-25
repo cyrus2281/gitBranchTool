@@ -27,8 +27,12 @@ Default is nothing (Run command with no argument to remove prefix)
 	Example: g set global-prefix feature/
 `,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		position := len(args) + 1
 		commands := []string{"default-branch", "local-prefix", "global-prefix"}
-		return commands, cobra.ShellCompDirectiveNoFileComp
+		if position == 1 {
+			return commands, cobra.ShellCompDirectiveNoFileComp
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
