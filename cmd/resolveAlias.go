@@ -21,7 +21,11 @@ var resolveAliasCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"resolve-alias", "r"},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return internal.GetAliases()
+		position := len(args) + 1
+		if position == 1 {
+			return internal.GetAliases()
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}

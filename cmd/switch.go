@@ -22,7 +22,11 @@ For example:
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"checkout", "check", "s"},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return internal.GetAllBranchesAndAliases()
+		position := len(args) + 1
+		if position == 1 {
+			return internal.GetAllBranchesAndAliases()
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		git := internal.Git{}

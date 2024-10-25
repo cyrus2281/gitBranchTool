@@ -25,6 +25,9 @@ var updateCheckCmd = &cobra.Command{
 	Short:   "Checks if a newer version is available",
 	Long:    `Checks if a newer version is available. Asks to upgrade if available",`,
 	Aliases: []string{"update-check", "uc"},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		yesToAll, _ := cmd.Flags().GetBool("yes-to-all")
 		checkVersionAndUpdate(yesToAll)

@@ -90,12 +90,6 @@ sudo chmod 755 /usr/local/bin/g
 Move-Item -Force -Path .\g-win-vX.X.X.exe -Destination C:\Windows\System32\g.exe
 ```
 
-3. Ensure the binary has the correct permissions (by default, the permissions are set to `Everyone: (RX)`)
-
-```powershell
-icacls C:\Windows\System32\g.exe /grant 'Everyone:(RX)'
-```
-
 ## Auto-Completion
 
 For auto-completion, you can run the following commands based on your shell:
@@ -127,12 +121,6 @@ sudo mkdir -p ${fpath[1]} && sudo touch ${fpath[1]}/_g && USER=$(whoami); sudo c
 ```
 
 ### Windows PowerShell
-
-Add the following to your PowerShell profile file (`$PROFILE`):
-
-```powershell
-g completion powershell | Out-String | Invoke-Expression
-```
 
 For default PowerShell profile file, run the following command:
 
@@ -166,31 +154,31 @@ echo "function prompt { g _ps }" >> $PROFILE
 A bash tool to facilitate managing git branches with long cryptic names with aliases
 
 Usage:
-g [command]
+  g [command]
 
 Available Commands:
-addAlias Adds alias and note to a branch that is not stored yet
-completion Generate the autocompletion script for the specified shell
-create Creates a branch with name, alias, and note, and checks into it
-currentBranch Returns the name of active branch with alias and note
-delete Deletes listed branches base on name or alias
-getBranchAlias Gets the branch alias
-getHome Get the gitBranchTool's home directory path
-help Help about any command
-list Lists all branches with their name, alias, and notes
-removeEntry Removes a registered branch entry without deleting the branch
-rename Updates the alias for the given branch name
-resolveAlias Resolves the branch name from an alias
-set Set configuration options (Run `g set --help` for more information)  
- switch Switches to the branch with the given name or alias
-updateBranchNote Adds/updates the notes for a branch base on name/alias
-updateCheck Checks if a newer version is available
+  addAlias         Adds alias and note to a branch that is not stored yet
+  completion       Generate the autocompletion script for the specified shell
+  create           Creates a branch with name, alias, and note, and checks into it
+  currentBranch    Returns the name of active branch with alias and note
+  delete           Deletes listed branches base on name or alias
+  getBranchAlias   Gets the branch alias
+  getHome          Get the gitBranchTool's home directory path
+  help             Help about any command
+  list             Lists all branches with their name, alias, and notes
+  removeEntry      Removes a registered branch entry without deleting the branch
+  rename           Updates the alias for the given branch name
+  resolveAlias     Resolves the branch name from an alias
+  set              Set configuration options (Run `g set --help` for more information)
+  switch           Switches to the branch with the given name or alias
+  updateBranchNote Adds/updates the notes for a branch base on name/alias
+  updateCheck      Checks if a newer version is available
 
 Flags:
--h, --help help for g
--N, --no-log no logs
--V, --verbose verbose output
--v, --version version for g
+  -h, --help      help for g
+  -N, --no-log    no logs
+  -V, --verbose   verbose output
+  -v, --version   version for g
 
 Use "g [command] --help" for more information about a command.
 ```
@@ -231,6 +219,12 @@ g d banner
 
 ```bash
 g d banner cyrus/jira-50930
+```
+
+- **Set branch name prefix for current repository**
+
+```bash
+g set local-prefix dev/
 ```
 
 - **Upgrade the tool to latest version**
