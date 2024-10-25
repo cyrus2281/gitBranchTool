@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"runtime"
 	"strings"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
@@ -20,18 +21,26 @@ var promptStringCmd = &cobra.Command{
 	Long:   `Returns the prompt string - used for the custom prompt`,
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		username := os.Getenv("LOGNAME")
-		currentUser, err := user.Current()
-		if err == nil {
-			username = currentUser.Username
+		prompt := ""
+		if runtime.GOOS == "windows" {
+			username := os.Getenv("USERNAME")
+			prompt = fmt.Sprintf("%s / %s # ", username, getPrompt(" > "))
+		} else {
+			username := os.Getenv("LOGNAME")
+			if username == "" {
+				currentUser, err := user.Current()
+				if err == nil {
+					username = currentUser.Username
+				}
+			}
+			prompt = fmt.Sprintf("%s ➤ %s ❖ ", username, getPrompt(" ⌥ "))
 		}
-		prompt := fmt.Sprintf("%s ➤ %s ❖ ", username, getPrompt())
 		fmt.Print(prompt)
 	},
 }
 
 // Build the custom prompt string
-func getPrompt() string {
+func getPrompt(separator string) string {
 	workingDirectory, err := os.Getwd()
 	if err != nil {
 		return "$"
@@ -69,7 +78,7 @@ func getPrompt() string {
 	}
 
 	// Custom Prompt String
-	return fmt.Sprintf("%s%s ⌥ %s", repo, subpath, currentBranch)
+	return repo + subpath + separator + currentBranch
 }
 
 func init() {
