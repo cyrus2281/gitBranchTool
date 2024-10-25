@@ -28,18 +28,24 @@ var createCmd = &cobra.Command{
 			notesString += note + " "
 		}
 
-		newBranch := internal.Branch{
-			Name:  name,
-			Alias: alias,
-			Note:  notesString,
-		}
-
 		git := internal.Git{}
 		if !git.IsGitRepo() {
 			logger.Fatalln("Not a git repository")
 		}
 
 		repoBranches := internal.GetRepositoryBranches()
+
+		if repoBranches.GetLocalPrefix() != "" {
+			name = repoBranches.GetLocalPrefix() + name
+		} else if internal.GetConfig(internal.GLOBAL_PREFIX_KEY) != "" {
+			name = internal.GetConfig(internal.GLOBAL_PREFIX_KEY) + name
+		}
+
+		newBranch := internal.Branch{
+			Name:  name,
+			Alias: alias,
+			Note:  notesString,
+		}
 		if repoBranches.AliasExists(newBranch.Alias) {
 			logger.Fatalln("Alias already exists. Alias must be unique.")
 		}

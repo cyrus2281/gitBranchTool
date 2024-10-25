@@ -17,8 +17,12 @@ const CONFIG_NAME = "gitBranchTool.config"
 
 func AddConfig(key string, value any) error {
 	viper.Set(key, value)
-	err := viper.SafeWriteConfig()
+	err := viper.WriteConfig()
 	return err
+}
+
+func GetConfig(key string) string {
+	return viper.GetString(key)
 }
 
 func GetHome() string {

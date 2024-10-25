@@ -4,23 +4,28 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cyrus2281/go-logger"
 )
 
 const DEFAULT_BRANCH = "main"
 
+const GLOBAL_PREFIX_KEY = "GIT_BRANCH_TOOL_GLOBAL_PREFIX"
+
 type RepositoryBranches struct {
 	RepositoryName string
 	StoreDirectory string
 	branches       []Branch
 	defaultBranch  string
+	localPrefix    string
 	loaded         bool
 }
 
 type repositoryBranchesJson struct {
 	Branches      []Branch `json:"branches"`
 	DefaultBranch string   `json:"defaultBranch"`
+	LocalPrefix   string   `json:"localPrefix"`
 }
 
 // Loads the persist file
@@ -44,6 +49,7 @@ func (s *RepositoryBranches) load() {
 	json.Unmarshal(content, &jsonData)
 	s.branches = jsonData.Branches
 	s.defaultBranch = jsonData.DefaultBranch
+	s.localPrefix = jsonData.LocalPrefix
 }
 
 // Saves the persist file
@@ -53,7 +59,7 @@ func (s *RepositoryBranches) save() {
 	if branchName == "" {
 		branchName = DEFAULT_BRANCH
 	}
-	jsonData := repositoryBranchesJson{s.branches, branchName}
+	jsonData := repositoryBranchesJson{s.branches, branchName, s.localPrefix}
 	jsonDataBytes, err := json.Marshal(jsonData)
 	logger.CheckFatalln(err)
 	err = os.WriteFile(repoStorePath, jsonDataBytes, 0644)
@@ -77,6 +83,21 @@ func (s *RepositoryBranches) GetDefaultBranch() string {
 		s.save()
 	}
 	return s.defaultBranch
+}
+
+func (s *RepositoryBranches) SetLocalPrefix(prefix string) {
+	if !s.loaded {
+		s.load()
+	}
+	s.localPrefix = strings.TrimSpace(prefix)
+	s.save()
+}
+
+func (s *RepositoryBranches) GetLocalPrefix() string {
+	if !s.loaded {
+		s.load()
+	}
+	return s.localPrefix
 }
 
 func (s *RepositoryBranches) GetBranches() []Branch {

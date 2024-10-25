@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.0.7
+> Added set command with local and global branch prefix & moved setDefaultBranch to here
+
 ### Version 3.0.6
 > Add prompt string command
 
