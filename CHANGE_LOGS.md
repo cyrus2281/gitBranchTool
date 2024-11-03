@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.1.1
+> Fixed the bug where the tool config was not being automatically created
+
 ### Version 3.1.0
 > Added `g get` command, (moved getHome to get) - Tool ready for public use milestone
 

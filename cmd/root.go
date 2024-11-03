@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "g",
@@ -54,24 +52,21 @@ func initConfig() {
 		logger.SetLogLevel(logger.INFO)
 	}
 
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		logger.CheckFatalln(err)
-		home = filepath.Join(home, internal.HOME_NAME)
-		if _, err := os.Stat(home); os.IsNotExist(err) {
-			// Create the directory
-			err = os.Mkdir(home, 0755)
-			logger.CheckFatalln(err)
-		}
+	// Find home directory.
+	home, err := os.UserHomeDir()
+	logger.CheckFatalln(err)
+	home = filepath.Join(home, internal.HOME_NAME)
 
-		// Search config in home directory with name ".gitBranchTool" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("gitBranchTool.config")
+	// Search config in home directory with name ".gitBranchTool" (without extension).
+	viper.AddConfigPath(home)
+	viper.SetConfigType("yaml")
+	viper.SetConfigName(internal.CONFIG_NAME)
+
+	if _, err := os.Stat(home); os.IsNotExist(err) {
+		// Create the directory
+		err = os.Mkdir(home, 0755)
+		logger.CheckFatalln(err)
+		viper.SafeWriteConfig()
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

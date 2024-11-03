@@ -30,6 +30,7 @@ func GetHome() string {
 		home, err := os.UserHomeDir()
 		logger.CheckFatalln(err)
 		gHome = filepath.Join(home, HOME_NAME)
+		viper.SafeWriteConfig()
 		if err := AddConfig("GIT_BRANCH_TOOL_HOME", gHome); err != nil {
 			logger.Fatalln(err)
 		}
