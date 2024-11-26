@@ -92,6 +92,11 @@ func (g *Git) DeleteBranch(name string, force bool) error {
 	}
 }
 
+func (g *Git) DeleteRemoteBranch(name string) error {
+	_, err := runCommand([]string{"git", "push", "origin", "--delete", name})
+	return err
+}
+
 func (g *Git) SwitchBranch(name string) error {
 	_, err := runCommand([]string{"git", "checkout", name})
 	return err
