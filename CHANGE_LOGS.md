@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.1.2
+> Added remote branch deletion support for the delete command
+
 ### Version 3.1.1
 > Fixed the bug where the tool config was not being automatically created
 
