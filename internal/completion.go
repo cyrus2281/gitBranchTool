@@ -61,6 +61,33 @@ func GetGitBranches() ([]string, cobra.ShellCompDirective) {
 	return []string{}, cobra.ShellCompDirectiveNoFileComp
 }
 
+func GetWorktreeAliases() ([]string, cobra.ShellCompDirective) {
+	completions := []string{}
+	git := Git{}
+	if git.IsGitRepo() {
+		repoBranches := GetRepositoryBranches()
+		for _, wt := range repoBranches.GetWorktrees() {
+			completions = append(completions, wt.Alias)
+		}
+	}
+	return completions, cobra.ShellCompDirectiveNoFileComp
+}
+
+func GetWorktreeAliasesAndPaths() ([]string, cobra.ShellCompDirective) {
+	completions := []string{}
+	git := Git{}
+	if git.IsGitRepo() {
+		repoBranches := GetRepositoryBranches()
+		for _, wt := range repoBranches.GetWorktrees() {
+			completions = append(completions, wt.Alias)
+			if !contains(completions, wt.Path) {
+				completions = append(completions, wt.Path)
+			}
+		}
+	}
+	return completions, cobra.ShellCompDirectiveNoFileComp
+}
+
 func GetAllBranchesAndAliases() ([]string, cobra.ShellCompDirective) {
 	completions, _ := GetGitBranches()
 	git := Git{}
