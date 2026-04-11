@@ -10,6 +10,7 @@ import (
 var gitCommands = map[string][]string{
 	"currentBranch":  {"git", "branch", "--show-current"},
 	"repositoryPath": {"git", "rev-parse", "--show-toplevel"},
+	"gitCommonDir":   {"git", "rev-parse", "--git-common-dir"},
 	"isGitRepo":      {"git", "rev-parse", "--is-inside-work-tree"},
 }
 
@@ -54,18 +55,34 @@ func (g *Git) GetCurrentBranch() (string, error) {
 	return g.currentBranch, nil
 }
 
-// GetRepositoryName returns the name of the git repository
+// GetRepositoryName returns the name of the main git repository.
+// Uses --git-common-dir to resolve the correct repo even from a worktree.
 func (g *Git) GetRepositoryName() (string, error) {
 	if g.repositoryName != "" {
 		return g.repositoryName, nil
 	}
-	// Run the command
-	repositoryPath, err := runCommand(gitCommands["repositoryPath"])
+	// Use --git-common-dir to get the main repo's .git path,
+	// which works correctly even when inside a worktree.
+	gitCommonDir, err := runCommand(gitCommands["gitCommonDir"])
 	if err != nil {
 		return "", err
 	}
-	// get the basename of the path
-	g.repositoryName = filepath.Base(repositoryPath)
+	// gitCommonDir returns something like:
+	//   ".git" (when in the main repo)
+	//   "/absolute/path/to/main-repo/.git" (when in a worktree)
+	//   "/absolute/path/to/main-repo/.git" (bare worktrees)
+	// We need the parent of the .git directory to get the repo name.
+	if !filepath.IsAbs(gitCommonDir) {
+		// Relative path (e.g. ".git") — resolve relative to --show-toplevel
+		repositoryPath, err := runCommand(gitCommands["repositoryPath"])
+		if err != nil {
+			return "", err
+		}
+		g.repositoryName = filepath.Base(repositoryPath)
+	} else {
+		// Absolute path — parent of .git dir is the main repo
+		g.repositoryName = filepath.Base(filepath.Dir(gitCommonDir))
+	}
 
 	return g.repositoryName, nil
 }
