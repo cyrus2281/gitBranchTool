@@ -1,6 +1,11 @@
 # Version Change Logs
 
 ### Version 3.2.3
+> implement passive update reminder functionality, close #25 (#31)
+
+Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
+
+### Version 3.2.3
 > remove copyright comments from set.go
 
 ### Version 3.2.2
