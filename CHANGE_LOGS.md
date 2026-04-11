@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.2.3
+> remove copyright comments from set.go
+
 ### Version 3.2.2
 > Enhance worktree creation and update documentation for commands (#30)
 
