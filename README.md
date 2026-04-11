@@ -22,7 +22,8 @@
     - [Linux/MacOS](#linuxmacos)
     - [Windows PowerShell](#windows-powershell-2)
   - [Commands](#commands)
-    - [Examples](#examples)
+    - [Worktrees](#worktrees)
+  - [Examples](#examples)
   - [Contributing](#contributing)
     - [Contributors](#contributors)
   - [License](#license)
@@ -173,6 +174,7 @@ Available Commands:
   switch           Switches to the branch with the given name or alias
   updateBranchNote Adds/updates the notes for a branch base on name/alias
   updateCheck      Checks if a newer version is available
+  worktree         Manage git worktrees (Run `g worktree --help` for more information)
 
 Flags:
   -h, --help      help for g
@@ -183,9 +185,59 @@ Flags:
 Use "g [command] --help" for more information about a command.
 ```
 
-### Examples
+### Worktrees
 
-- **Create Branch**
+Git worktrees allow you to have multiple working directories attached to the same repository, enabling you to work on different branches simultaneously without switching. `gitBranchTool` provides first-class support for managing worktrees with the same alias/note workflow you use for branches.
+
+All worktree features are **opt-in** and do not affect users who don't use worktrees.
+
+#### Worktree Commands
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `g worktree` | `g w` | Shows worktree help and lists all worktrees |
+| `g worktree create ALIAS [BRANCH] [...NOTE]` | `g w c` | Create a new worktree |
+| `g worktree list` | `g w l` | List all worktrees (registered and unregistered) |
+| `g worktree delete [...PATH\|ALIAS] [--force]` | `g w d` | Delete worktree(s) by alias or path |
+| `g worktree prune` | `g w p` | Remove stale worktree entries |
+
+**`g worktree create`** behavior:
+- If `BRANCH` is provided and matches a registered branch (by name or alias), the worktree is created for that branch and the branch is auto-registered if not already.
+- If `BRANCH` is provided but not found in registered branches, the worktree is created with that branch as-is. If the branch doesn't exist in git, a new branch is created but is **not** automatically registered (use `g addAlias <branch> <alias>` to register it).
+- If `BRANCH` is omitted, a new branch is created using the alias as the branch name.
+
+**`g worktree list`** shows all worktrees from `git worktree list`, including those created outside of `gitBranchTool`. Registered worktrees display their alias and note.
+
+**`g worktree delete`** accepts both aliases and full paths, so you can delete worktrees created outside of `gitBranchTool` as well.
+
+**`g worktree prune`** runs `git worktree prune` first, then removes any stored entries whose paths no longer exist.
+
+#### Worktree Integration with Branch Commands
+
+Existing branch commands support an optional `-w` flag for worktree integration:
+
+| Command | Description |
+|---------|-------------|
+| `g create NAME ALIAS [...NOTE] -w` | Create a new branch **and** a worktree for it (branch is not checked out in the current directory) |
+| `g create NAME ALIAS [...NOTE] -w=WT_ALIAS` | Same as above, but with a custom worktree alias |
+| `g switch NAME/ALIAS -w` | Find the worktree for a branch and print its path. If no worktree exists, create one |
+| `g delete NAME/ALIAS -w` | Delete a branch and its associated worktree |
+| `g list` | When worktrees exist, the branch list shows a "Worktree" column with the alias or path |
+
+> **Note:** To specify a custom worktree alias with `-w`, use the `=` syntax: `-w=my-alias`. The space-separated form (`-w my-alias`) is not supported due to CLI parsing limitations.
+
+#### Worktree Settings
+
+| Setting | Command | Description |
+|---------|---------|-------------|
+| `worktree-path` | `g set worktree-path <TEMPLATE>` | Path template for new worktrees. Available variables: `{repository}`, `{alias}`, `{branch}`. Default: `./worktrees/{alias}` |
+| `delete-branches-worktree` | `g set delete-branches-worktree <true\|false\|null>` | Controls worktree deletion when a branch is deleted. `true`: auto-delete, `false`: never delete, `null`: prompt (default) |
+
+Retrieve settings with `g get worktree-path` and `g get delete-branches-worktree`.
+
+## Examples
+
+- **Create a branch**
 
 ```bash
 g c cyrus/jira-60083 banner "Adds banner to the home page"
@@ -233,6 +285,84 @@ g set local-prefix dev/
 g uc -y
 ```
 
+- **Create a worktree for an existing branch**
+
+```bash
+g w c my-feature feature/my-feature "Working on login page"
+```
+
+- **Create a worktree with a new branch (alias becomes the branch name)**
+
+```bash
+g w c quick-fix
+```
+
+- **List all worktrees**
+
+```bash
+g w l
+```
+
+- **Delete a worktree by alias**
+
+```bash
+g w d my-feature
+```
+
+- **Force delete a worktree with uncommitted changes**
+
+```bash
+g w d my-feature -f
+```
+
+- **Delete multiple worktrees**
+
+```bash
+g w d my-feature bugfix-123
+```
+
+- **Delete an unregistered worktree by path**
+
+```bash
+g w d /path/to/worktree
+```
+
+- **Prune stale worktree entries**
+
+```bash
+g w p
+```
+
+- **Create a branch and worktree together**
+
+```bash
+g c feature/auth auth "Auth system" -w
+```
+
+- **Find or create a worktree when switching**
+
+```bash
+g s feature/auth -w
+```
+
+- **Delete a branch and its worktree**
+
+```bash
+g d auth -w
+```
+
+- **Customize the worktree path template**
+
+```bash
+g set worktree-path "../{repository}-worktrees/{alias}"
+```
+
+- **Auto-delete worktrees when branches are deleted**
+
+```bash
+g set delete-branches-worktree true
+```
+
 ## Contributing
 
 This repository is open for contributions.
@@ -260,4 +390,4 @@ Version need to be updated in following files (Use search and replace all):
 This project is licensed under the
 [MIT License](./LICENSE)
 
-Copyright 2024 - Cyrus Mobini (@cyrus2281)
+Copyright 2026 - Cyrus Mobini (@cyrus2281)
