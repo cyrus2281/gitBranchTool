@@ -102,6 +102,44 @@ func (g *Git) SwitchBranch(name string) error {
 	return err
 }
 
+// WorktreeAdd creates a worktree for an existing branch
+func (g *Git) WorktreeAdd(path, branch string) error {
+	_, err := runCommand([]string{"git", "worktree", "add", path, branch})
+	return err
+}
+
+// WorktreeAddNewBranch creates a new branch and a worktree for it
+func (g *Git) WorktreeAddNewBranch(branch, path string) error {
+	_, err := runCommand([]string{"git", "worktree", "add", "-b", branch, path})
+	return err
+}
+
+// WorktreeRemove removes a worktree by path
+func (g *Git) WorktreeRemove(path string, force bool) error {
+	if force {
+		_, err := runCommand([]string{"git", "worktree", "remove", path, "--force"})
+		return err
+	}
+	_, err := runCommand([]string{"git", "worktree", "remove", path})
+	return err
+}
+
+// WorktreeList returns the porcelain output of git worktree list
+func (g *Git) WorktreeList() (string, error) {
+	return runCommand([]string{"git", "worktree", "list", "--porcelain"})
+}
+
+// WorktreePrune removes stale worktree entries
+func (g *Git) WorktreePrune() error {
+	_, err := runCommand([]string{"git", "worktree", "prune"})
+	return err
+}
+
+// GetRepositoryPath returns the absolute path to the repository root
+func (g *Git) GetRepositoryPath() (string, error) {
+	return runCommand(gitCommands["repositoryPath"])
+}
+
 func (g *Git) GetBranches() ([]string, error) {
 	output, err := runCommand([]string{"git", "branch"})
 	if err != nil {

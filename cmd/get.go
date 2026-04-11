@@ -26,10 +26,14 @@ var getCmd = &cobra.Command{
 - get global-prefix: Get the branch prefix for all repositories
 
 - get home: Get the path to the home directory for the g command
+
+- get worktree-path: Get the worktree path template
+
+- get delete-branches-worktree: Get the delete-branches-worktree setting
 `,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
-		commands := []string{"default-branch", "local-prefix", "global-prefix", "home"}
+		commands := []string{"default-branch", "local-prefix", "global-prefix", "home", "worktree-path", "delete-branches-worktree"}
 		if position == 1 {
 			return commands, cobra.ShellCompDirectiveNoFileComp
 		}
@@ -78,8 +82,19 @@ var getCmd = &cobra.Command{
 			home = filepath.Join(home, internal.HOME_NAME)
 			logger.InfoF("Home directory is ")
 			fmt.Println(home)
+		case "worktree-path":
+			path := internal.GetWorktreePath()
+			logger.InfoF("Worktree path template is ")
+			fmt.Println(path)
+		case "delete-branches-worktree":
+			value := internal.GetConfig(internal.DELETE_BRANCHES_WORKTREE_KEY)
+			if value == "" {
+				value = "null"
+			}
+			logger.InfoF("Delete branches worktree is set to ")
+			fmt.Println("\"" + value + "\"")
 		default:
-			logger.Fatalln("Invalid command!\n\tAvailable commands: default-branch, local-prefix, global-prefix, home")
+			logger.Fatalln("Invalid command!\n\tAvailable commands: default-branch, local-prefix, global-prefix, home, worktree-path, delete-branches-worktree")
 		}
 	},
 }

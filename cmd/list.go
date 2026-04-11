@@ -22,10 +22,51 @@ var listCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		repoBranches := internal.GetRepositoryBranches()
-		internal.PrintTableHeader()
-		for index, branch := range repoBranches.GetBranches() {
-			logger.InfoF("%d) ", index)
-			fmt.Println(branch.String())
+		branches := repoBranches.GetBranches()
+
+		// Check git worktree list for ANY worktrees (not just stored ones)
+		git := internal.Git{}
+		worktreeListOutput, _ := git.WorktreeList()
+		worktreeMap := internal.ParseWorktreeList(worktreeListOutput)
+
+		// Build branch-to-worktree info map from git worktree list
+		// Map branch name -> "alias (path)" or just "path" if no alias
+		branchToWorktreeInfo := make(map[string]string)
+		for path, branchName := range worktreeMap {
+			if branchName == "" {
+				continue
+			}
+			// Check if this worktree has a stored alias
+			wt, ok := repoBranches.GetWorktreeByPath(path)
+			if ok {
+				branchToWorktreeInfo[branchName] = wt.Alias
+			} else {
+				branchToWorktreeInfo[branchName] = path
+			}
+		}
+
+		// Determine if any registered branch has a worktree
+		hasWorktrees := false
+		for _, branch := range branches {
+			if _, ok := branchToWorktreeInfo[branch.Name]; ok {
+				hasWorktrees = true
+				break
+			}
+		}
+
+		if hasWorktrees {
+			internal.PrintBranchTableHeaderWithWorktree()
+			for index, branch := range branches {
+				wtInfo := branchToWorktreeInfo[branch.Name]
+				logger.InfoF("%d) ", index)
+				fmt.Printf("%-20s\t%-20s\t%-20s\t%-15s\n", branch.Name, branch.Alias, branch.Note, wtInfo)
+			}
+		} else {
+			internal.PrintTableHeader()
+			for index, branch := range branches {
+				logger.InfoF("%d) ", index)
+				fmt.Println(branch.String())
+			}
 		}
 	},
 }

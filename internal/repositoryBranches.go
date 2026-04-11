@@ -17,15 +17,17 @@ type RepositoryBranches struct {
 	RepositoryName string
 	StoreDirectory string
 	branches       []Branch
+	worktrees      []Worktree
 	defaultBranch  string
 	localPrefix    string
 	loaded         bool
 }
 
 type repositoryBranchesJson struct {
-	Branches      []Branch `json:"branches"`
-	DefaultBranch string   `json:"defaultBranch"`
-	LocalPrefix   string   `json:"localPrefix"`
+	Branches      []Branch   `json:"branches"`
+	Worktrees     []Worktree `json:"worktrees,omitempty"`
+	DefaultBranch string     `json:"defaultBranch"`
+	LocalPrefix   string     `json:"localPrefix"`
 }
 
 // Loads the persist file
@@ -36,6 +38,7 @@ func (s *RepositoryBranches) load() {
 	if _, err := os.Stat(repoStorePath); os.IsNotExist(err) {
 		// File does not exist
 		s.branches = []Branch{}
+		s.worktrees = []Worktree{}
 		return
 	}
 	// Read the file
@@ -48,6 +51,10 @@ func (s *RepositoryBranches) load() {
 	jsonData := repositoryBranchesJson{}
 	json.Unmarshal(content, &jsonData)
 	s.branches = jsonData.Branches
+	s.worktrees = jsonData.Worktrees
+	if s.worktrees == nil {
+		s.worktrees = []Worktree{}
+	}
 	s.defaultBranch = jsonData.DefaultBranch
 	s.localPrefix = jsonData.LocalPrefix
 }
@@ -59,7 +66,7 @@ func (s *RepositoryBranches) save() {
 	if branchName == "" {
 		branchName = DEFAULT_BRANCH
 	}
-	jsonData := repositoryBranchesJson{s.branches, branchName, s.localPrefix}
+	jsonData := repositoryBranchesJson{s.branches, s.worktrees, branchName, s.localPrefix}
 	jsonDataBytes, err := json.Marshal(jsonData)
 	logger.CheckFatalln(err)
 	err = os.WriteFile(repoStorePath, jsonDataBytes, 0644)
@@ -211,4 +218,70 @@ func (s *RepositoryBranches) UpdateBranch(branch Branch) {
 			return
 		}
 	}
+}
+
+// Worktree methods
+
+func (s *RepositoryBranches) GetWorktrees() []Worktree {
+	if !s.loaded {
+		s.load()
+	}
+	return s.worktrees
+}
+
+func (s *RepositoryBranches) AddWorktree(worktree Worktree) {
+	if !s.loaded {
+		s.load()
+	}
+	s.worktrees = append(s.worktrees, worktree)
+	s.save()
+}
+
+func (s *RepositoryBranches) RemoveWorktree(worktree Worktree) {
+	if !s.loaded {
+		s.load()
+	}
+	for index, w := range s.worktrees {
+		if w.Alias == worktree.Alias {
+			s.worktrees = append(s.worktrees[:index], s.worktrees[index+1:]...)
+			s.save()
+			return
+		}
+	}
+}
+
+func (s *RepositoryBranches) GetWorktreeByAlias(alias string) (Worktree, bool) {
+	if !s.loaded {
+		s.load()
+	}
+	for _, w := range s.worktrees {
+		if w.Alias == alias {
+			return w, true
+		}
+	}
+	return Worktree{}, false
+}
+
+func (s *RepositoryBranches) GetWorktreeByPath(path string) (Worktree, bool) {
+	if !s.loaded {
+		s.load()
+	}
+	for _, w := range s.worktrees {
+		if w.Path == path {
+			return w, true
+		}
+	}
+	return Worktree{}, false
+}
+
+func (s *RepositoryBranches) WorktreeAliasExists(alias string) bool {
+	if !s.loaded {
+		s.load()
+	}
+	for _, w := range s.worktrees {
+		if w.Alias == alias {
+			return true
+		}
+	}
+	return false
 }
