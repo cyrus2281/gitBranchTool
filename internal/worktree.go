@@ -56,6 +56,10 @@ func ParseWorktreeList(output string) map[string]string {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "worktree ") {
 			currentPath = strings.TrimPrefix(line, "worktree ")
+			if currentPath != "" {
+				// Record immediately so detached worktrees (no branch line) are preserved
+				result[currentPath] = ""
+			}
 		} else if strings.HasPrefix(line, "branch ") {
 			branchRef := strings.TrimPrefix(line, "branch ")
 			// Convert refs/heads/branch-name to branch-name

@@ -66,7 +66,12 @@ func (s *RepositoryBranches) save() {
 	if branchName == "" {
 		branchName = DEFAULT_BRANCH
 	}
-	jsonData := repositoryBranchesJson{s.branches, s.worktrees, branchName, s.localPrefix}
+	jsonData := repositoryBranchesJson{
+		Branches:      s.branches,
+		Worktrees:     s.worktrees,
+		DefaultBranch: branchName,
+		LocalPrefix:   s.localPrefix,
+	}
 	jsonDataBytes, err := json.Marshal(jsonData)
 	logger.CheckFatalln(err)
 	err = os.WriteFile(repoStorePath, jsonDataBytes, 0644)

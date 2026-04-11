@@ -72,8 +72,12 @@ var deleteCmd = &cobra.Command{
 					logger.InfoF("Branch \"%s\" is checked out in worktree at %s\n", branch.Name, worktreePath)
 					logger.InfoF("Delete the worktree as well? (y/n): ")
 					var response string
-					fmt.Scanln(&response)
-					shouldDeleteWorktree = response == "y" || response == "Y" || response == "yes"
+					if _, err := fmt.Scanln(&response); err != nil {
+						logger.WarningF("Failed to read response, defaulting to not deleting worktree: %v\n", err)
+						shouldDeleteWorktree = false
+					} else {
+						shouldDeleteWorktree = response == "y" || response == "Y" || response == "yes"
+					}
 				}
 			}
 

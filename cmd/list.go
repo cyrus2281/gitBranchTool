@@ -30,7 +30,7 @@ var listCmd = &cobra.Command{
 		worktreeMap := internal.ParseWorktreeList(worktreeListOutput)
 
 		// Build branch-to-worktree info map from git worktree list
-		// Map branch name -> "alias (path)" or just "path" if no alias
+		// Map branch name -> stored alias if available, otherwise the worktree path
 		branchToWorktreeInfo := make(map[string]string)
 		for path, branchName := range worktreeMap {
 			if branchName == "" {
