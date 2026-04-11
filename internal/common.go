@@ -20,6 +20,9 @@ const WORKTREE_PATH_KEY = "GIT_BRANCH_TOOL_WORKTREE_PATH"
 const DELETE_BRANCHES_WORKTREE_KEY = "GIT_BRANCH_TOOL_DELETE_BRANCHES_WORKTREE"
 const DEFAULT_WORKTREE_PATH = "./worktrees/{alias}"
 
+const LAST_UPDATE_CHECK_KEY = "GIT_BRANCH_TOOL_LAST_UPDATE_CHECK"
+const UPDATE_CHECK_INTERVAL_DAYS = 5
+
 func AddConfig(key string, value any) error {
 	viper.Set(key, value)
 	err := viper.WriteConfig()

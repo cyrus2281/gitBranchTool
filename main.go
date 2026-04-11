@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 Cyrus Mobini
-*/
 package main
 
 import (
