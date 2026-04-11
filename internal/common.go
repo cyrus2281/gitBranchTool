@@ -16,7 +16,7 @@ const CONFIG_NAME = "gitBranchTool.config"
 
 const WORKTREE_PATH_KEY = "GIT_BRANCH_TOOL_WORKTREE_PATH"
 const DELETE_BRANCHES_WORKTREE_KEY = "GIT_BRANCH_TOOL_DELETE_BRANCHES_WORKTREE"
-const DEFAULT_WORKTREE_PATH = "../{repository}-worktrees/{alias}"
+const DEFAULT_WORKTREE_PATH = "./worktrees/{alias}"
 
 func AddConfig(key string, value any) error {
 	viper.Set(key, value)

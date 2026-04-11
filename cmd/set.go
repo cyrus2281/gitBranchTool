@@ -28,7 +28,7 @@ Default is nothing (Run command with no argument to remove prefix)
 
 - set worktree-path <TEMPLATE> : Change the path template for worktrees.
 Available variables: {repository}, {alias}, {branch}
-Default is "../{repository}-worktrees/{alias}" (Run command with no argument to reset to default)
+Default is "./worktrees/{alias}" (Run command with no argument to reset to default)
 	Example: g set worktree-path "../{repository}-worktrees/{alias}"
 	Example: g set worktree-path "../.worktrees/{repository}/{branch}"
 
