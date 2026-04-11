@@ -4,8 +4,6 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
@@ -34,8 +32,9 @@ var currentBranchCmd = &cobra.Command{
 		if !ok {
 			logger.FatalF("Branch \"%v\" is not registered\n", currentBranch)
 		}
-		internal.PrintTableHeader()
-		fmt.Println(branch.String())
+		headers := []string{"Branch Name", "Alias", "Note"}
+		rows := [][]string{{branch.Name, branch.Alias, branch.Note}}
+		internal.PrintTable(headers, rows)
 	},
 }
 

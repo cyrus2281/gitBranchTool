@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/viper"
@@ -56,19 +58,70 @@ func GetRepositoryBranches() RepositoryBranches {
 	return repoBranches
 }
 
-func PrintTableHeader() {
-	logger.InfoF("   %-20s\t%-20s\t%-20s\n", "Branch Name", "Alias", "Note")
-	logger.Infoln("------------------------------------------------------------")
-}
+// PrintTable prints a formatted table with dynamic column widths.
+// Headers define column names, rows contain the data.
+// Row numbering (0), 1), ...) is added automatically.
+func PrintTable(headers []string, rows [][]string) {
+	colCount := len(headers)
 
-func PrintBranchTableHeaderWithWorktree() {
-	logger.InfoF("   %-20s\t%-20s\t%-20s\t%-15s\n", "Branch Name", "Alias", "Note", "Worktree")
-	logger.Infoln("-------------------------------------------------------------------------------")
-}
+	// Compute max width per column from headers and data
+	widths := make([]int, colCount)
+	for i, h := range headers {
+		widths[i] = len(h)
+	}
+	for _, row := range rows {
+		for i := 0; i < colCount && i < len(row); i++ {
+			if len(row[i]) > widths[i] {
+				widths[i] = len(row[i])
+			}
+		}
+	}
 
-func PrintWorktreeTableHeader() {
-	logger.InfoF("   %-40s\t%-15s\t%-25s\t%-15s\t%-20s\n", "Path", "Alias", "Branch", "Branch Alias", "Note")
-	logger.Infoln("------------------------------------------------------------------------------------------------------------------------------")
+	// Compute index prefix width (e.g. "0) " = 3, "10) " = 4)
+	indexWidth := 3
+	if len(rows) >= 10 {
+		indexWidth = len(fmt.Sprintf("%d) ", len(rows)-1))
+	}
+	padding := 3
+
+	// Print header
+	fmt.Printf("%s", strings.Repeat(" ", indexWidth))
+	for i, h := range headers {
+		if i < colCount-1 {
+			fmt.Printf("%-*s%s", widths[i], h, strings.Repeat(" ", padding))
+		} else {
+			fmt.Printf("%s", h)
+		}
+	}
+	fmt.Println()
+
+	// Print separator
+	totalWidth := indexWidth
+	for i, w := range widths {
+		totalWidth += w
+		if i < colCount-1 {
+			totalWidth += padding
+		}
+	}
+	fmt.Println(strings.Repeat("-", totalWidth))
+
+	// Print rows
+	for idx, row := range rows {
+		prefix := fmt.Sprintf("%d) ", idx)
+		fmt.Printf("%-*s", indexWidth, prefix)
+		for i := 0; i < colCount; i++ {
+			cell := ""
+			if i < len(row) {
+				cell = row[i]
+			}
+			if i < colCount-1 {
+				fmt.Printf("%-*s%s", widths[i], cell, strings.Repeat(" ", padding))
+			} else {
+				fmt.Printf("%s", cell)
+			}
+		}
+		fmt.Println()
+	}
 }
 
 func GetWorktreePath() string {
