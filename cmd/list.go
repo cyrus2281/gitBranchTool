@@ -4,10 +4,7 @@ Copyright © 2024 Cyrus Mobini
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
-	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +33,6 @@ var listCmd = &cobra.Command{
 			if branchName == "" {
 				continue
 			}
-			// Check if this worktree has a stored alias
 			wt, ok := repoBranches.GetWorktreeByPath(path)
 			if ok {
 				branchToWorktreeInfo[branchName] = wt.Alias
@@ -55,18 +51,19 @@ var listCmd = &cobra.Command{
 		}
 
 		if hasWorktrees {
-			internal.PrintBranchTableHeaderWithWorktree()
-			for index, branch := range branches {
-				wtInfo := branchToWorktreeInfo[branch.Name]
-				logger.InfoF("%d) ", index)
-				fmt.Printf("%-20s\t%-20s\t%-20s\t%-15s\n", branch.Name, branch.Alias, branch.Note, wtInfo)
+			headers := []string{"Branch Name", "Alias", "Note", "Worktree"}
+			rows := make([][]string, len(branches))
+			for i, branch := range branches {
+				rows[i] = []string{branch.Name, branch.Alias, branch.Note, branchToWorktreeInfo[branch.Name]}
 			}
+			internal.PrintTable(headers, rows)
 		} else {
-			internal.PrintTableHeader()
-			for index, branch := range branches {
-				logger.InfoF("%d) ", index)
-				fmt.Println(branch.String())
+			headers := []string{"Branch Name", "Alias", "Note"}
+			rows := make([][]string, len(branches))
+			for i, branch := range branches {
+				rows[i] = []string{branch.Name, branch.Alias, branch.Note}
 			}
+			internal.PrintTable(headers, rows)
 		}
 	},
 }

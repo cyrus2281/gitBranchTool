@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/cyrus2281/go-logger"
 	"github.com/spf13/cobra"
@@ -35,14 +33,12 @@ var worktreeListCmd = &cobra.Command{
 
 		repoBranches := internal.GetRepositoryBranches()
 		storedWorktrees := repoBranches.GetWorktrees()
-
-		// Build a set of paths we've already shown from stored worktrees
 		shownPaths := make(map[string]bool)
 
-		internal.PrintWorktreeTableHeader()
-		index := 0
+		headers := []string{"Path", "Alias", "Branch", "Branch Alias", "Note"}
+		rows := [][]string{}
 
-		// First show stored worktrees (these have alias/note)
+		// First add stored worktrees (these have alias/note)
 		for _, wt := range storedWorktrees {
 			branch := worktreeMap[wt.Path]
 			branchAlias := ""
@@ -52,13 +48,11 @@ var worktreeListCmd = &cobra.Command{
 					branchAlias = b.Alias
 				}
 			}
-			logger.InfoF("%d) ", index)
-			fmt.Println(wt.StringWithBranch(branch, branchAlias))
+			rows = append(rows, []string{wt.Path, wt.Alias, branch, branchAlias, wt.Note})
 			shownPaths[wt.Path] = true
-			index++
 		}
 
-		// Then show unregistered worktrees from git
+		// Then add unregistered worktrees from git
 		for path, branch := range worktreeMap {
 			if shownPaths[path] {
 				continue
@@ -70,15 +64,10 @@ var worktreeListCmd = &cobra.Command{
 					branchAlias = b.Alias
 				}
 			}
-			unregistered := internal.Worktree{
-				Alias: "",
-				Path:  path,
-				Note:  "",
-			}
-			logger.InfoF("%d) ", index)
-			fmt.Println(unregistered.StringWithBranch(branch, branchAlias))
-			index++
+			rows = append(rows, []string{path, "", branch, branchAlias, ""})
 		}
+
+		internal.PrintTable(headers, rows)
 	},
 }
 

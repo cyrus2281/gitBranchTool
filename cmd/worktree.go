@@ -57,8 +57,8 @@ var worktreeCmd = &cobra.Command{
 		storedWorktrees := repoBranches.GetWorktrees()
 		shownPaths := make(map[string]bool)
 
-		internal.PrintWorktreeTableHeader()
-		index := 0
+		headers := []string{"Path", "Alias", "Branch", "Branch Alias", "Note"}
+		rows := [][]string{}
 
 		for _, wt := range storedWorktrees {
 			branch := worktreeMap[wt.Path]
@@ -69,10 +69,8 @@ var worktreeCmd = &cobra.Command{
 					branchAlias = b.Alias
 				}
 			}
-			logger.InfoF("%d) ", index)
-			fmt.Println(wt.StringWithBranch(branch, branchAlias))
+			rows = append(rows, []string{wt.Path, wt.Alias, branch, branchAlias, wt.Note})
 			shownPaths[wt.Path] = true
-			index++
 		}
 
 		for path, branch := range worktreeMap {
@@ -86,11 +84,10 @@ var worktreeCmd = &cobra.Command{
 					branchAlias = b.Alias
 				}
 			}
-			unregistered := internal.Worktree{Path: path}
-			logger.InfoF("%d) ", index)
-			fmt.Println(unregistered.StringWithBranch(branch, branchAlias))
-			index++
+			rows = append(rows, []string{path, "", branch, branchAlias, ""})
 		}
+
+		internal.PrintTable(headers, rows)
 	},
 }
 
