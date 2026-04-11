@@ -43,6 +43,6 @@ func checkUpdateReminder() {
 	}
 
 	if status == VersionMinorUpdate || status == VersionMajorUpdate {
-		fmt.Printf("\033[94mUpdate available: v%s (current: v%s). Run 'g updateCheck' to upgrade.\033[0m\n", latestVersion, rootCmd.Version)
+		fmt.Printf("Update available: v%s (current: v%s). Run 'g updateCheck' to upgrade.\n", latestVersion, rootCmd.Version)
 	}
 }
