@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.2.2
+> Enhance worktree creation and update documentation for commands (#30)
+
 ### Version 3.2.1
 > Replace print statements with a unified PrintTable function for better table formatting (#29)
 
