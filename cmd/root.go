@@ -10,6 +10,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Commands that trigger the passive update reminder check
+var updateReminderCommands = map[string]bool{
+	"g":        true,
+	"list":     true,
+	"worktree": true,
+	"help":     true,
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "g",
@@ -35,6 +43,14 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "V", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&noLog, "no-log", "N", false, "no logs")
+	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		if updateReminderCommands[cmd.Name()] {
+			checkUpdateReminder()
+		}
+	}
+	rootCmd.Run = func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	}
 	cobra.OnInitialize(initConfig)
 }
 
