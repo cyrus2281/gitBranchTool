@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.2.0
+> Add worktree management commands and functionality (#28)
+
 ### Version 3.1.2
 > Added remote branch deletion support for the delete command
 
