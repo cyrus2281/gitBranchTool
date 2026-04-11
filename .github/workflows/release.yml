@@ -125,7 +125,7 @@ jobs:
           with open('README.md') as f:
               readme = f.read()
 
-          match = re.search(r'(^## Overview.*?)(?=^### Examples)', readme, re.MULTILINE | re.DOTALL)
+          match = re.search(r'(^## Overview.*?)(?=^## Examples)', readme, re.MULTILINE | re.DOTALL)
           readme_section = match.group(1).rstrip() if match else ''
 
           notes = (
