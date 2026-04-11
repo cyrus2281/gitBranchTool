@@ -74,6 +74,12 @@ Examples:
 			branchName = alias
 		}
 
+		// Check if branch auto-registration will work before making any changes
+		branchAlreadyRegistered := repoBranches.BranchExists(internal.Branch{Name: branchName})
+		if !branchAlreadyRegistered && repoBranches.AliasExists(alias) {
+			logger.FatalF("Branch alias \"%s\" already exists. Cannot auto-register branch \"%s\".\n", alias, branchName)
+		}
+
 		// Resolve worktree path
 		repoPath, err := git.GetRepositoryPath()
 		if err != nil {
@@ -107,21 +113,17 @@ Examples:
 		repoBranches.AddWorktree(newWorktree)
 		logger.InfoF("Worktree \"%s\" created at %s\n", alias, resolvedPath)
 
-		// Auto-register branch if not already registered
-		branchEntry := internal.Branch{
-			Name:  branchName,
-			Alias: alias,
-			Note:  notes,
-		}
-		if repoBranches.BranchExists(branchEntry) {
-			logger.DebugF("Branch \"%s\" is already registered\n", branchName)
-		} else {
-			if repoBranches.AliasExists(alias) {
-				logger.WarningF("Branch alias \"%s\" already exists. Branch \"%s\" was not auto-registered.\n", alias, branchName)
-			} else {
-				repoBranches.AddBranch(branchEntry)
-				logger.InfoF("Branch \"%s\" registered with alias \"%s\"\n", branchName, alias)
+		// Auto-register branch
+		if !branchAlreadyRegistered {
+			branchEntry := internal.Branch{
+				Name:  branchName,
+				Alias: alias,
+				Note:  notes,
 			}
+			repoBranches.AddBranch(branchEntry)
+			logger.InfoF("Branch \"%s\" registered with alias \"%s\"\n", branchName, alias)
+		} else {
+			logger.DebugF("Branch \"%s\" is already registered\n", branchName)
 		}
 	},
 }
