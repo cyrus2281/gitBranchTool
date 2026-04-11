@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.2.4
+> enhance GetRepositoryName to use gitCommonDir for accurate repo name resolution (#32)
+
 ### Version 3.2.3
 > implement passive update reminder functionality, close #25 (#31)
 
