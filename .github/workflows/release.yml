@@ -131,7 +131,7 @@ jobs:
           notes = (
               f"## What's Changed\n"
               f"- {description}\n\n"
-              f"**Full Changelog**: {prev_tag}...{new_tag}\n\n"
+              f"**Full Changelog**: https://github.com/cyrus2281/gitBranchTool/compare/{prev_tag}...{new_tag}\n\n"
               f"---\n\n"
               f"{readme_section}\n"
           )

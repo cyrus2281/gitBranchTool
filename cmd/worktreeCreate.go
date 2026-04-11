@@ -12,6 +12,9 @@ var worktreeCreateCmd = &cobra.Command{
 	Long: `Create a new worktree for a branch.
 
 If BRANCH is provided, it can be a branch name or alias (resolved from registered branches).
+If no registered reference is found, it will create the worktree with the branch as-is.
+If the branch does not exist in git, a new branch will be created but will NOT be
+automatically registered (use "g addAlias <branch> <alias>" to register it).
 If BRANCH is not provided, a new branch is created with the alias as the branch name.
 
 The worktree path is determined by the worktree-path setting.
@@ -58,15 +61,16 @@ Examples:
 			logger.FatalF("Worktree alias \"%s\" already exists. Alias must be unique.\n", alias)
 		}
 
-		// Resolve the branch name
+		// Resolve the branch name and determine if we should auto-register
 		var branchName string
+		branchResolved := false // true if branch was resolved from registered branches
 		if hasBranch {
-			// Try to resolve from registered branches
 			branch, ok := repoBranches.GetBranchByNameOrAlias(branchArg)
 			if ok {
 				branchName = branch.Name
+				branchResolved = true
 			} else {
-				// Use as-is (could be an unregistered git branch)
+				// Use as-is — unregistered branch, will NOT be auto-registered
 				branchName = branchArg
 			}
 		} else {
@@ -74,10 +78,13 @@ Examples:
 			branchName = alias
 		}
 
-		// Check if branch auto-registration will work before making any changes
-		branchAlreadyRegistered := repoBranches.BranchExists(internal.Branch{Name: branchName})
-		if !branchAlreadyRegistered && repoBranches.AliasExists(alias) {
-			logger.FatalF("Branch alias \"%s\" already exists. Cannot auto-register branch \"%s\".\n", alias, branchName)
+		// Only validate alias conflict if we plan to auto-register
+		shouldAutoRegister := !hasBranch || branchResolved
+		if shouldAutoRegister {
+			branchAlreadyRegistered := repoBranches.BranchExists(internal.Branch{Name: branchName})
+			if !branchAlreadyRegistered && repoBranches.AliasExists(alias) {
+				logger.FatalF("Branch alias \"%s\" already exists. Cannot auto-register branch \"%s\".\n", alias, branchName)
+			}
 		}
 
 		// Resolve worktree path
@@ -93,12 +100,16 @@ Examples:
 		resolvedPath := internal.ResolveWorktreePath(template, repoPath, repoName, alias, branchName)
 
 		// Create the worktree
-		if hasBranch {
-			// Worktree for existing branch
-			err = git.WorktreeAdd(resolvedPath, branchName)
-		} else {
-			// New branch + worktree
+		if !hasBranch {
+			// No branch provided — create new branch + worktree
 			err = git.WorktreeAddNewBranch(branchName, resolvedPath)
+		} else {
+			// Branch provided — try existing branch first
+			err = git.WorktreeAdd(resolvedPath, branchName)
+			if err != nil && !branchResolved {
+				// Branch doesn't exist in git either — create it
+				err = git.WorktreeAddNewBranch(branchName, resolvedPath)
+			}
 		}
 		if err != nil {
 			logger.Fatalln("Failed to create worktree:", err)
@@ -113,17 +124,20 @@ Examples:
 		repoBranches.AddWorktree(newWorktree)
 		logger.InfoF("Worktree \"%s\" created at %s\n", alias, resolvedPath)
 
-		// Auto-register branch
-		if !branchAlreadyRegistered {
-			branchEntry := internal.Branch{
-				Name:  branchName,
-				Alias: alias,
-				Note:  notes,
+		// Auto-register branch only when appropriate
+		if shouldAutoRegister {
+			branchAlreadyRegistered := repoBranches.BranchExists(internal.Branch{Name: branchName})
+			if !branchAlreadyRegistered {
+				branchEntry := internal.Branch{
+					Name:  branchName,
+					Alias: alias,
+					Note:  notes,
+				}
+				repoBranches.AddBranch(branchEntry)
+				logger.InfoF("Branch \"%s\" registered with alias \"%s\"\n", branchName, alias)
+			} else {
+				logger.DebugF("Branch \"%s\" is already registered\n", branchName)
 			}
-			repoBranches.AddBranch(branchEntry)
-			logger.InfoF("Branch \"%s\" registered with alias \"%s\"\n", branchName, alias)
-		} else {
-			logger.DebugF("Branch \"%s\" is already registered\n", branchName)
 		}
 	},
 }
