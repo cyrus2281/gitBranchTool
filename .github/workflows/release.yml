@@ -1,0 +1,152 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      bump: ${{ steps.parse.outputs.bump }}
+      description: ${{ steps.parse.outputs.description }}
+    steps:
+      - name: Parse commit message
+        id: parse
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          if echo "$COMMIT_MSG" | grep -qE '^(feat|fix)!:'; then
+            echo "bump=major" >> "$GITHUB_OUTPUT"
+          elif echo "$COMMIT_MSG" | grep -qE '^feat:'; then
+            echo "bump=minor" >> "$GITHUB_OUTPUT"
+          elif echo "$COMMIT_MSG" | grep -qE '^fix:'; then
+            echo "bump=patch" >> "$GITHUB_OUTPUT"
+          else
+            echo "bump=none" >> "$GITHUB_OUTPUT"
+          fi
+
+          DESCRIPTION=$(echo "$COMMIT_MSG" | sed -E 's/^(feat|fix)!?:[[:space:]]*//')
+          echo "description<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$DESCRIPTION" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: check-commit
+    if: needs.check-commit.outputs.bump != 'none'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Compute new version
+        id: version
+        run: |
+          CURRENT=$(grep 'const VERSION =' internal/version.go | sed -E 's/.*"([^"]+)".*/\1/')
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          case "${{ needs.check-commit.outputs.bump }}" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW="$MAJOR.$MINOR.$PATCH"
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "tag=V$NEW" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=V$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Update internal/version.go
+        run: |
+          sed -i 's/const VERSION = "[^"]*"/const VERSION = "${{ steps.version.outputs.version }}"/' internal/version.go
+
+      - name: Update CHANGE_LOGS.md
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+          DESCRIPTION: ${{ needs.check-commit.outputs.description }}
+        run: |
+          python3 << 'PYEOF'
+          import os
+          version = os.environ['NEW_VERSION']
+          description = os.environ['DESCRIPTION']
+          with open('CHANGE_LOGS.md') as f:
+              content = f.read()
+          lines = content.split('\n')
+          new_entry = [f'### Version {version}', f'> {description}', '']
+          new_lines = lines[:2] + new_entry + lines[2:]
+          with open('CHANGE_LOGS.md', 'w') as f:
+              f.write('\n'.join(new_lines))
+          PYEOF
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add internal/version.go CHANGE_LOGS.md
+          git commit -m "chore: release ${{ steps.version.outputs.tag }}"
+          git tag ${{ steps.version.outputs.tag }}
+          git push
+          git push origin ${{ steps.version.outputs.tag }}
+
+      - name: Build binaries
+        run: |
+          mkdir -p bin
+          VERSION="${{ steps.version.outputs.version }}"
+          GOOS=linux   go build -o bin/g-linux-v$VERSION
+          GOOS=darwin  go build -o bin/g-macos-v$VERSION
+          GOOS=windows go build -o bin/g-win-v$VERSION.exe
+
+      - name: Generate release notes
+        env:
+          NEW_TAG: ${{ steps.version.outputs.tag }}
+          PREV_TAG: ${{ steps.version.outputs.previous_tag }}
+          DESCRIPTION: ${{ needs.check-commit.outputs.description }}
+        run: |
+          python3 << 'PYEOF'
+          import os, re
+          description = os.environ['DESCRIPTION']
+          new_tag     = os.environ['NEW_TAG']
+          prev_tag    = os.environ['PREV_TAG']
+
+          with open('README.md') as f:
+              readme = f.read()
+
+          match = re.search(r'(^## Overview.*?)(?=^### Examples)', readme, re.MULTILINE | re.DOTALL)
+          readme_section = match.group(1).rstrip() if match else ''
+
+          notes = (
+              f"## What's Changed\n"
+              f"- {description}\n\n"
+              f"**Full Changelog**: {prev_tag}...{new_tag}\n\n"
+              f"---\n\n"
+              f"{readme_section}\n"
+          )
+
+          with open('release_notes.md', 'w') as f:
+              f.write(notes)
+          PYEOF
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          body_path: release_notes.md
+          files: |
+            bin/g-linux-v${{ steps.version.outputs.version }}
+            bin/g-macos-v${{ steps.version.outputs.version }}
+            bin/g-win-v${{ steps.version.outputs.version }}.exe
