@@ -32,24 +32,30 @@ Examples:
 		repoBranches := internal.GetRepositoryBranches()
 
 		for _, item := range args {
-			// Look up worktree by alias first, then by path
+			// Look up worktree by alias first, then by stored path
 			wt, ok := repoBranches.GetWorktreeByAlias(item)
 			if !ok {
 				wt, ok = repoBranches.GetWorktreeByPath(item)
 			}
-			if !ok {
-				logger.WarningF("Worktree \"%s\" not found\n", item)
-				continue
-			}
 
-			err := git.WorktreeRemove(wt.Path, force)
-			if err != nil {
-				logger.WarningF("Failed to delete worktree \"%s\": %v\n", wt.Alias, err)
-				continue
+			if ok {
+				// Registered worktree — remove via stored path
+				err := git.WorktreeRemove(wt.Path, force)
+				if err != nil {
+					logger.WarningF("Failed to delete worktree \"%s\": %v\n", wt.Alias, err)
+					continue
+				}
+				repoBranches.RemoveWorktree(wt)
+				logger.InfoF("Worktree \"%s\" at %s was deleted\n", wt.Alias, wt.Path)
+			} else {
+				// Not registered — try removing by path directly via git
+				err := git.WorktreeRemove(item, force)
+				if err != nil {
+					logger.WarningF("Failed to delete worktree \"%s\": %v\n", item, err)
+					continue
+				}
+				logger.InfoF("Worktree at %s was deleted\n", item)
 			}
-
-			repoBranches.RemoveWorktree(wt)
-			logger.InfoF("Worktree \"%s\" at %s was deleted\n", wt.Alias, wt.Path)
 		}
 	},
 }
