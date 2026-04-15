@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.2.6
+> enhance branch management with improved update checks, worktree handling and error recovery (#34)
+
 ### Version 3.2.5
 > log git commands in verbose mode (#33)
 
