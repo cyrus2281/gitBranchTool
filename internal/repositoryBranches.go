@@ -49,7 +49,9 @@ func (s *RepositoryBranches) load() {
 	}
 	// Parse the JSON
 	jsonData := repositoryBranchesJson{}
-	json.Unmarshal(content, &jsonData)
+	if err := json.Unmarshal(content, &jsonData); err != nil {
+		logger.FatalF("Failed to parse repository data (%s): %v\n", repoStorePath, err)
+	}
 	s.branches = jsonData.Branches
 	s.worktrees = jsonData.Worktrees
 	if s.worktrees == nil {

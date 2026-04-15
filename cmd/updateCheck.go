@@ -131,15 +131,19 @@ func checkVersionAndUpdate(yesToAll bool) {
 			input = strings.ToLower(strings.TrimSpace(input))
 			if input == "y" || input == "yes" {
 				downloadLatest = true
+			} else {
+				logger.Infoln("Update skipped.")
 			}
 		}
 		if downloadLatest {
 			if err := downloadAndReplace(downloadURL, latestVersion); err != nil {
 				logger.Fatalln("Error updating: ", err)
 			}
+			clearRequiresUpdate()
 		}
 	case VersionUpToDate:
 		logger.Infoln("You're already on the latest version.")
+		clearRequiresUpdate()
 	case VersionUnofficial:
 		logger.Infoln("You're on an unofficial version. Please check the latest release.")
 		logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
