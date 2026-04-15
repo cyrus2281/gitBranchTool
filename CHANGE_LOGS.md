@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.2.7
+> Register branch with alias after successful worktree creation (#37)
+
 ### Version 3.2.5
 > log git commands in verbose mode (#33)
 
