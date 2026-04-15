@@ -31,6 +31,7 @@ var updateCheckCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		yesToAll, _ := cmd.Flags().GetBool("yes-to-all")
 		checkVersionAndUpdate(yesToAll)
+		clearRequiresUpdate()
 		saveUpdateCheckTimestamp()
 	},
 }

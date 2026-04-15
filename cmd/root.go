@@ -43,7 +43,7 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "V", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&noLog, "no-log", "N", false, "no logs")
-	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+	rootCmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
 		if updateReminderCommands[cmd.Name()] {
 			checkUpdateReminder()
 		}
