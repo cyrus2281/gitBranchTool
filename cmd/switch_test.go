@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -135,5 +136,105 @@ func TestExecuteSwitch_WorktreeMode_CreateNew(t *testing.T) {
 	wtPath := filepath.Join(repoDir, "worktrees", "new-wt-alias")
 	if _, err := os.Stat(wtPath); os.IsNotExist(err) {
 		t.Error("worktree directory should exist")
+	}
+}
+
+// TestSwitchSubprocessHelper is invoked as a subprocess by the fail tests below.
+// It calls executeSwitch directly so we can observe os.Exit from logger.Fatalln.
+func TestSwitchSubprocessHelper(t *testing.T) {
+	if os.Getenv("SWITCH_TEST_SUBPROCESS") != "1" {
+		t.Skip("subprocess helper — invoked by fail tests")
+	}
+
+	repoDir := os.Getenv("SWITCH_TEST_REPO_DIR")
+	storeDir := os.Getenv("SWITCH_TEST_STORE_DIR")
+	os.Chdir(repoDir)
+
+	store := &internal.RepositoryBranches{
+		RepositoryName: filepath.Base(repoDir),
+		StoreDirectory: storeDir,
+	}
+	git := &internal.Git{}
+
+	var opts switchOpts
+	if os.Getenv("SWITCH_TEST_WORKTREE") == "1" {
+		repoPath, _ := git.GetRepositoryPath()
+		opts = switchOpts{
+			UseWorktree:          true,
+			WorktreePathTemplate: "./worktrees/{alias}",
+			RepoPath:             repoPath,
+			RepoName:             filepath.Base(repoDir),
+		}
+	}
+
+	executeSwitch(git, store,
+		os.Getenv("SWITCH_TEST_ID"),
+		os.Getenv("SWITCH_TEST_ALIAS"),
+		"",
+		opts,
+	)
+}
+
+// TestExecuteSwitch_FailNoRegister verifies that a failed branch switch
+// (nonexistent branch) does not register the branch in the store.
+func TestExecuteSwitch_FailNoRegister(t *testing.T) {
+	repoDir := initTestRepo(t)
+	storeDir := t.TempDir()
+	storeDir, _ = filepath.EvalSymlinks(storeDir)
+
+	cmd := exec.Command(os.Args[0], "-test.run=^TestSwitchSubprocessHelper$")
+	cmd.Dir = repoDir
+	cmd.Env = append(os.Environ(),
+		"SWITCH_TEST_SUBPROCESS=1",
+		"SWITCH_TEST_REPO_DIR="+repoDir,
+		"SWITCH_TEST_STORE_DIR="+storeDir,
+		"SWITCH_TEST_ID=nonexistent-branch",
+		"SWITCH_TEST_ALIAS=nb",
+	)
+	err := cmd.Run()
+	if err == nil {
+		t.Fatal("expected switch to nonexistent branch to fail")
+	}
+
+	store := &internal.RepositoryBranches{
+		RepositoryName: filepath.Base(repoDir),
+		StoreDirectory: storeDir,
+	}
+	if len(store.GetBranches()) != 0 {
+		t.Errorf("expected 0 branches after failed switch, got %d", len(store.GetBranches()))
+	}
+}
+
+// TestExecuteSwitch_WorktreeMode_FailNoRegister verifies that a failed worktree
+// creation (nonexistent branch) registers neither branch nor worktree.
+func TestExecuteSwitch_WorktreeMode_FailNoRegister(t *testing.T) {
+	repoDir := initTestRepo(t)
+	storeDir := t.TempDir()
+	storeDir, _ = filepath.EvalSymlinks(storeDir)
+
+	cmd := exec.Command(os.Args[0], "-test.run=^TestSwitchSubprocessHelper$")
+	cmd.Dir = repoDir
+	cmd.Env = append(os.Environ(),
+		"SWITCH_TEST_SUBPROCESS=1",
+		"SWITCH_TEST_REPO_DIR="+repoDir,
+		"SWITCH_TEST_STORE_DIR="+storeDir,
+		"SWITCH_TEST_ID=nonexistent-branch",
+		"SWITCH_TEST_ALIAS=nb",
+		"SWITCH_TEST_WORKTREE=1",
+	)
+	err := cmd.Run()
+	if err == nil {
+		t.Fatal("expected worktree creation for nonexistent branch to fail")
+	}
+
+	store := &internal.RepositoryBranches{
+		RepositoryName: filepath.Base(repoDir),
+		StoreDirectory: storeDir,
+	}
+	if len(store.GetBranches()) != 0 {
+		t.Errorf("expected 0 branches after failed worktree creation, got %d", len(store.GetBranches()))
+	}
+	if len(store.GetWorktrees()) != 0 {
+		t.Errorf("expected 0 worktrees after failed worktree creation, got %d", len(store.GetWorktrees()))
 	}
 }

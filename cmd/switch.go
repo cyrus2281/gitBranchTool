@@ -117,16 +117,6 @@ func executeSwitch(git *internal.Git, repoBranches *internal.RepositoryBranches,
 			}
 		}
 
-		if !branchRegistered && hasAlias {
-			newBranch := internal.Branch{Name: branchName, Alias: alias, Note: notes}
-			if !repoBranches.AliasExists(alias) {
-				repoBranches.AddBranch(newBranch)
-				logger.InfoF("Branch \"%s\" has been registered with alias \"%s\"\n", branchName, alias)
-			} else {
-				logger.WarningF("Alias \"%s\" already exists. Branch was not registered.\n", alias)
-			}
-		}
-
 		if repoBranches.WorktreeAliasExists(wtAlias) {
 			logger.FatalF("Worktree alias \"%s\" already exists. Alias must be unique.\n", wtAlias)
 		}
@@ -136,6 +126,17 @@ func executeSwitch(git *internal.Git, repoBranches *internal.RepositoryBranches,
 		err = git.WorktreeAdd(resolvedPath, branchName)
 		if err != nil {
 			logger.Fatalln("Failed to create worktree:", err)
+		}
+
+		// Register the branch after successful worktree creation
+		if !branchRegistered && hasAlias {
+			newBranch := internal.Branch{Name: branchName, Alias: alias, Note: notes}
+			if !repoBranches.AliasExists(alias) {
+				repoBranches.AddBranch(newBranch)
+				logger.InfoF("Branch \"%s\" has been registered with alias \"%s\"\n", branchName, alias)
+			} else {
+				logger.WarningF("Alias \"%s\" already exists. Branch was not registered.\n", alias)
+			}
 		}
 
 		newWorktree := internal.Worktree{Alias: wtAlias, Path: resolvedPath, Note: notes}
