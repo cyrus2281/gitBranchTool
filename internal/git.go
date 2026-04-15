@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/cyrus2281/go-logger"
 )
 
 var gitCommands = map[string][]string{
@@ -15,6 +17,7 @@ var gitCommands = map[string][]string{
 }
 
 func runCommand(command []string) (string, error) {
+	logger.Debugln("Running:", strings.Join(command, " "))
 	// Run the command
 	cmd := exec.Command(command[0], command[1:]...)
 
