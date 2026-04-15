@@ -49,15 +49,19 @@ Example:
 		// Compare stored worktrees against active paths
 		repoBranches := internal.GetRepositoryBranches()
 		storedWorktrees := repoBranches.GetWorktrees()
-		prunedCount := 0
 
+
+		var toRemove []internal.Worktree
 		for _, wt := range storedWorktrees {
 			if !activePaths[wt.Path] {
-				repoBranches.RemoveWorktree(wt)
-				logger.InfoF("Pruned stale worktree entry \"%s\" at %s\n", wt.Alias, wt.Path)
-				prunedCount++
+				toRemove = append(toRemove, wt)
 			}
 		}
+		for _, wt := range toRemove {
+			repoBranches.RemoveWorktree(wt)
+			logger.InfoF("Pruned stale worktree entry \"%s\" at %s\n", wt.Alias, wt.Path)
+		}
+		prunedCount := len(toRemove)
 
 		if prunedCount == 0 {
 			logger.Infoln("No stale worktree entries found")

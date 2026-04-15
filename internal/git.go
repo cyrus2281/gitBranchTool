@@ -27,7 +27,7 @@ func runCommand(command []string) (string, error) {
 		if len(output) > 0 {
 			return "", fmt.Errorf("%v", strings.TrimSpace(string(output)))
 		}
-		return "", fmt.Errorf("%v", output)
+		return "", err
 	}
 
 	// Convert the output to a string and trim any whitespace
@@ -165,17 +165,28 @@ func (g *Git) GetBranches() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	branches := strings.Split(output, "\n")
-	parsedBranches := make([]string, 0, len(branches))
-	for _, branch := range branches {
-		branch = strings.TrimSpace(branch)
-		if branch == "" {
+	return parseBranchOutput(output), nil
+}
+
+// parseBranchOutput parses the output of `git branch` into a list of branch names.
+// It strips the `*` marker from the current branch, trims whitespace,
+// and filters out detached HEAD entries.
+func parseBranchOutput(output string) []string {
+	lines := strings.Split(output, "\n")
+	parsedBranches := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
 			continue
 		}
-		if strings.HasPrefix(branch, "*") {
-			branch = strings.TrimSpace(branch[1:])
+		if strings.HasPrefix(line, "*") {
+			line = strings.TrimSpace(line[1:])
 		}
-		parsedBranches = append(parsedBranches, branch)
+		// Filter out detached HEAD entries like "(HEAD detached at abc123)"
+		if strings.HasPrefix(line, "(") {
+			continue
+		}
+		parsedBranches = append(parsedBranches, line)
 	}
-	return parsedBranches, nil
+	return parsedBranches
 }
