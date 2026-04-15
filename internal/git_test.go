@@ -84,6 +84,18 @@ func TestParseBranchOutput_OnlyDetachedHead(t *testing.T) {
 	}
 }
 
+func TestParseBranchOutput_BranchStartingWithParen(t *testing.T) {
+	// Branch names starting with "(" are legal in git and should not be filtered
+	input := "  (my-branch)\n  main"
+	result := parseBranchOutput(input)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 branches, got %d: %v", len(result), result)
+	}
+	if result[0] != "(my-branch)" {
+		t.Errorf("expected '(my-branch)', got %q", result[0])
+	}
+}
+
 func TestParseBranchOutput_MixedSpacing(t *testing.T) {
 	input := "  main\n    feature-a\n*   bugfix-1"
 	result := parseBranchOutput(input)

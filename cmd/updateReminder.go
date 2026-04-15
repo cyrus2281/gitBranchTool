@@ -37,11 +37,12 @@ func isCheckIntervalElapsed() bool {
 
 func checkUpdateReminder() {
 	requiresUpdate := strings.ToLower(internal.GetConfig(internal.REQUIRES_UPDATE_KEY))
-	if requiresUpdate == "true" {
-		logger.InfoF("\n\tUpdate available. Run 'g updateCheck' to upgrade.\n")
-	}
 
 	if !isCheckIntervalElapsed() {
+		// Between checks — show stored reminder if an update was previously detected
+		if requiresUpdate == "true" {
+			logger.InfoF("\n\tUpdate available. Run 'g updateCheck' to upgrade.\n")
+		}
 		return
 	}
 

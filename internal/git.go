@@ -183,7 +183,9 @@ func parseBranchOutput(output string) []string {
 			line = strings.TrimSpace(line[1:])
 		}
 		// Filter out detached HEAD entries like "(HEAD detached at abc123)"
-		if strings.HasPrefix(line, "(") {
+		// Uses Contains rather than HasPrefix("(") to avoid dropping valid
+		// branch names that happen to start with a parenthesis.
+		if strings.Contains(line, "HEAD detached") {
 			continue
 		}
 		parsedBranches = append(parsedBranches, line)

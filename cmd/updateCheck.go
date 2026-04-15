@@ -109,7 +109,6 @@ func checkVersionAndUpdate(yesToAll bool) {
 	}
 
 	logger.InfoF("Current version: %s, Latest version: %s\n", rootCmd.Version, latestVersion)
-	clearUpdateReminder := true
 
 	status, err := compareVersions(rootCmd.Version, latestVersion)
 	if err != nil {
@@ -134,23 +133,20 @@ func checkVersionAndUpdate(yesToAll bool) {
 				downloadLatest = true
 			} else {
 				logger.Infoln("Update skipped.")
-				clearUpdateReminder = false
 			}
 		}
 		if downloadLatest {
 			if err := downloadAndReplace(downloadURL, latestVersion); err != nil {
 				logger.Fatalln("Error updating: ", err)
 			}
+			clearRequiresUpdate()
 		}
 	case VersionUpToDate:
 		logger.Infoln("You're already on the latest version.")
+		clearRequiresUpdate()
 	case VersionUnofficial:
 		logger.Infoln("You're on an unofficial version. Please check the latest release.")
 		logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
-	}
-
-	if clearUpdateReminder{
-		clearRequiresUpdate()
 	}
 }
 
