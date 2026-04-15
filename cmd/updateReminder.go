@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -43,6 +42,6 @@ func checkUpdateReminder() {
 	}
 
 	if status == VersionMinorUpdate || status == VersionMajorUpdate {
-		fmt.Printf("Update available: v%s (current: v%s). Run 'g updateCheck' to upgrade.\n", latestVersion, rootCmd.Version)
+		logger.InfoF("Update available: v%s (current: v%s). Run 'g updateCheck' to upgrade.\n", latestVersion, rootCmd.Version)
 	}
 }

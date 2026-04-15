@@ -44,38 +44,46 @@ func getPrompt(separator string) string {
 	}
 
 	git := internal.Git{}
-	// Repository name
 	repo, err := git.GetRepositoryName()
 	if err != nil || repo == "" {
 		return workingDirectory
 	}
 
-	// Branch Name
 	currentBranch, err := git.GetCurrentBranch()
 	if err != nil || currentBranch == "" {
 		return workingDirectory
 	}
 
-	// Alias Name
+	branchAlias := ""
 	repoBranches := internal.GetRepositoryBranches()
 	branch, ok := repoBranches.GetBranchByName(currentBranch)
-	if ok && branch.Alias != "" {
-		currentBranch = fmt.Sprintf("%s (%s)", currentBranch, branch.Alias)
+	if ok {
+		branchAlias = branch.Alias
 	}
 
-	// Subpath
+	return buildPrompt(repo, currentBranch, branchAlias, workingDirectory, separator)
+}
+
+// buildPrompt assembles the prompt string from resolved values.
+func buildPrompt(repoName, currentBranch, branchAlias, workingDir, separator string) string {
+	// Format branch with alias if present
+	branchDisplay := currentBranch
+	if branchAlias != "" {
+		branchDisplay = fmt.Sprintf("%s (%s)", currentBranch, branchAlias)
+	}
+
+	// Compute subpath relative to repo
 	subpath := ""
-	index := strings.Index(workingDirectory, repo)
+	index := strings.Index(workingDir, repoName)
 	if index >= 0 {
-		subpath = workingDirectory[index+len(repo):]
+		subpath = workingDir[index+len(repoName):]
 		subpath = strings.TrimPrefix(subpath, "/")
 		if subpath != "" {
 			subpath = fmt.Sprintf(" [%s]", subpath)
 		}
 	}
 
-	// Custom Prompt String
-	return repo + subpath + separator + currentBranch
+	return repoName + subpath + separator + branchDisplay
 }
 
 func init() {

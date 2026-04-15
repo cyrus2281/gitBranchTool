@@ -27,7 +27,6 @@ var deleteCmd = &cobra.Command{
 			logger.Fatalln("Not a git repository")
 		}
 
-		itemsToDelete := args
 		safeDelete, _ := cmd.Flags().GetBool("safe-delete")
 		ignoreErrors, _ := cmd.Flags().GetBool("ignore-errors")
 		remote, _ := cmd.Flags().GetBool("remote")
@@ -35,7 +34,6 @@ var deleteCmd = &cobra.Command{
 		forceWorktree, _ := cmd.Flags().GetBool("worktree")
 		repoBranches := internal.GetRepositoryBranches()
 
-		// Get worktree info for branch-worktree association
 		deleteBranchesWorktree := internal.GetConfig(internal.DELETE_BRANCHES_WORKTREE_KEY)
 		var worktreeMap map[string]string
 		if forceWorktree || deleteBranchesWorktree == "true" || deleteBranchesWorktree == "" || deleteBranchesWorktree == "null" {
@@ -45,76 +43,97 @@ var deleteCmd = &cobra.Command{
 			}
 		}
 
-		for _, item := range itemsToDelete {
-			branch, ok := repoBranches.GetBranchByNameOrAlias(item)
-			if !ok {
-				logger.InfoF("Branch/Alias \"%v\" not found\n", item)
-				continue
-			}
-
-			// Check if branch has a worktree
-			shouldDeleteWorktree := false
-			worktreePath := ""
+		for _, item := range args {
+			shouldDeleteWt := false
 			if worktreeMap != nil {
-				worktreePath = internal.GetWorktreePathForBranch(worktreeMap, branch.Name)
-			}
-
-			if worktreePath != "" {
-				if forceWorktree || deleteBranchesWorktree == "true" {
-					shouldDeleteWorktree = true
-				} else if deleteBranchesWorktree == "false" {
-					shouldDeleteWorktree = false
-				} else {
-					// null or empty — prompt the user
-					logger.InfoF("Branch \"%s\" is checked out in worktree at %s\n", branch.Name, worktreePath)
-					logger.InfoF("Delete the worktree as well? (y/n): ")
-					var response string
-					if _, err := fmt.Scanln(&response); err != nil {
-						logger.WarningF("Failed to read response, defaulting to not deleting worktree: %v\n", err)
-						shouldDeleteWorktree = false
-					} else {
-						shouldDeleteWorktree = response == "y" || response == "Y" || response == "yes"
+				branch, ok := repoBranches.GetBranchByNameOrAlias(item)
+				if ok {
+					wtPath := internal.GetWorktreePathForBranch(worktreeMap, branch.Name)
+					if wtPath != "" {
+						if forceWorktree || deleteBranchesWorktree == "true" {
+							shouldDeleteWt = true
+						} else if deleteBranchesWorktree != "false" {
+							logger.InfoF("Branch \"%s\" is checked out in worktree at %s\n", branch.Name, wtPath)
+							logger.InfoF("Delete the worktree as well? (y/n): ")
+							var response string
+							if _, err := fmt.Scanln(&response); err != nil {
+								logger.WarningF("Failed to read response, defaulting to not deleting worktree: %v\n", err)
+							} else {
+								shouldDeleteWt = response == "y" || response == "Y" || response == "yes"
+							}
+						}
 					}
 				}
 			}
 
-			// Delete worktree FIRST if needed (git won't let us delete a branch checked out in a worktree)
-			if shouldDeleteWorktree && worktreePath != "" {
-				err := git.WorktreeRemove(worktreePath, true)
-				if err != nil {
-					logger.WarningF("Failed to delete worktree at %s: %v\n", worktreePath, err)
-				} else {
-					logger.InfoF("Worktree at %s was deleted\n", worktreePath)
-					// Remove from stored worktrees
-					wt, found := repoBranches.GetWorktreeByPath(worktreePath)
-					if found {
-						repoBranches.RemoveWorktree(wt)
-					}
-				}
+			opts := deleteOpts{
+				Force:                !safeDelete,
+				IgnoreErrors:         ignoreErrors,
+				Remote:               remote,
+				RemoteOnly:           remoteOnly,
+				ShouldDeleteWorktree: shouldDeleteWt,
+				WorktreeMap:          worktreeMap,
 			}
+			executeDeleteBranch(&git, &repoBranches, item, opts)
+		}
+	},
+}
 
-			var err error
-			if !remoteOnly {
-				err = git.DeleteBranch(branch.Name, !safeDelete)
-				if err != nil {
-					logger.WarningF("Failed to delete branch \"%v\", %v\n", branch.Name, err)
-				}
+type deleteOpts struct {
+	Force                bool
+	IgnoreErrors         bool
+	Remote               bool
+	RemoteOnly           bool
+	ShouldDeleteWorktree bool
+	WorktreeMap          map[string]string
+}
 
-				if err == nil || ignoreErrors {
-					repoBranches.RemoveBranch(branch)
-					logger.InfoF("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
-				}
-			}
-			if (err == nil || ignoreErrors) && (remote || remoteOnly) {
-				err = git.DeleteRemoteBranch(branch.Name)
-				if err != nil {
-					logger.WarningF("Failed to delete remote branch \"%v\", %v\n", branch.Name, err)
-				} else {
-					logger.InfoF("Remote branch \"%v\" was deleted\n", branch.Name)
+func executeDeleteBranch(git *internal.Git, repoBranches *internal.RepositoryBranches,
+	item string, opts deleteOpts) {
+
+	branch, ok := repoBranches.GetBranchByNameOrAlias(item)
+	if !ok {
+		logger.InfoF("Branch/Alias \"%v\" not found\n", item)
+		return
+	}
+
+	// Delete worktree FIRST if needed (git won't let us delete a branch checked out in a worktree)
+	if opts.ShouldDeleteWorktree && opts.WorktreeMap != nil {
+		worktreePath := internal.GetWorktreePathForBranch(opts.WorktreeMap, branch.Name)
+		if worktreePath != "" {
+			err := git.WorktreeRemove(worktreePath, true)
+			if err != nil {
+				logger.WarningF("Failed to delete worktree at %s: %v\n", worktreePath, err)
+			} else {
+				logger.InfoF("Worktree at %s was deleted\n", worktreePath)
+				wt, found := repoBranches.GetWorktreeByPath(worktreePath)
+				if found {
+					repoBranches.RemoveWorktree(wt)
 				}
 			}
 		}
-	},
+	}
+
+	var err error
+	if !opts.RemoteOnly {
+		err = git.DeleteBranch(branch.Name, opts.Force)
+		if err != nil {
+			logger.WarningF("Failed to delete branch \"%v\", %v\n", branch.Name, err)
+		}
+
+		if err == nil || opts.IgnoreErrors {
+			repoBranches.RemoveBranch(branch)
+			logger.InfoF("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
+		}
+	}
+	if (err == nil || opts.IgnoreErrors) && (opts.Remote || opts.RemoteOnly) {
+		err = git.DeleteRemoteBranch(branch.Name)
+		if err != nil {
+			logger.WarningF("Failed to delete remote branch \"%v\", %v\n", branch.Name, err)
+		} else {
+			logger.InfoF("Remote branch \"%v\" was deleted\n", branch.Name)
+		}
+	}
 }
 
 func init() {
