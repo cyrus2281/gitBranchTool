@@ -20,17 +20,17 @@ jobs:
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
-          if echo "$COMMIT_MSG" | grep -qE '^(feat|fix)!:'; then
+          if echo "$COMMIT_MSG" | grep -qE '^(feat|fix)(\(.*\))?!:'; then
             echo "bump=major" >> "$GITHUB_OUTPUT"
-          elif echo "$COMMIT_MSG" | grep -qE '^feat:'; then
+          elif echo "$COMMIT_MSG" | grep -qE '^feat(\(.*\))?:'; then
             echo "bump=minor" >> "$GITHUB_OUTPUT"
-          elif echo "$COMMIT_MSG" | grep -qE '^fix:'; then
+          elif echo "$COMMIT_MSG" | grep -qE '^fix(\(.*\))?:'; then
             echo "bump=patch" >> "$GITHUB_OUTPUT"
           else
             echo "bump=none" >> "$GITHUB_OUTPUT"
           fi
 
-          DESCRIPTION=$(echo "$COMMIT_MSG" | sed -E 's/^(feat|fix)!?:[[:space:]]*//')
+          DESCRIPTION=$(echo "$COMMIT_MSG" | sed -E 's/^(feat|fix)(\(.*\))?!?:[[:space:]]*//')
           echo "description<<EOF" >> "$GITHUB_OUTPUT"
           echo "$DESCRIPTION" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
