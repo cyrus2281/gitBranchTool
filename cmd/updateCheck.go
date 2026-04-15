@@ -31,7 +31,6 @@ var updateCheckCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		yesToAll, _ := cmd.Flags().GetBool("yes-to-all")
 		checkVersionAndUpdate(yesToAll)
-		clearRequiresUpdate()
 		saveUpdateCheckTimestamp()
 	},
 }
@@ -110,6 +109,7 @@ func checkVersionAndUpdate(yesToAll bool) {
 	}
 
 	logger.InfoF("Current version: %s, Latest version: %s\n", rootCmd.Version, latestVersion)
+	clearUpdateReminder := true
 
 	status, err := compareVersions(rootCmd.Version, latestVersion)
 	if err != nil {
@@ -132,6 +132,9 @@ func checkVersionAndUpdate(yesToAll bool) {
 			input = strings.ToLower(strings.TrimSpace(input))
 			if input == "y" || input == "yes" {
 				downloadLatest = true
+			} else {
+				logger.Infoln("Update skipped.")
+				clearUpdateReminder = false
 			}
 		}
 		if downloadLatest {
@@ -144,6 +147,10 @@ func checkVersionAndUpdate(yesToAll bool) {
 	case VersionUnofficial:
 		logger.Infoln("You're on an unofficial version. Please check the latest release.")
 		logger.InfoF("\tLatest release page: https://www.github.com/%s/releases/tag/V%s\n", internal.GITHUB_REPOSITORY, latestVersion)
+	}
+
+	if clearUpdateReminder{
+		clearRequiresUpdate()
 	}
 }
 
