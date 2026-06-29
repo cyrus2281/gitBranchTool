@@ -167,6 +167,7 @@ Available Commands:
   getBranchAlias   Gets the branch alias
   help             Help about any command
   list             Lists all branches with their name, alias, and notes
+  merge            Merges or rebases the given branch into the current branch
   removeEntry      Removes a registered branch entry without deleting the branch
   rename           Updates the alias for the given branch name
   resolveAlias     Resolves the branch name from an alias
@@ -184,6 +185,30 @@ Flags:
 
 Use "g [command] --help" for more information about a command.
 ```
+
+### Merge
+
+`g merge [NAME/ALIAS]` (alias `g m`) merges — or, with `--rebase`, rebases — the given branch **into the current branch**, resolving the argument through your branch aliases. With **no argument** it uses the configured default branch, making `g merge` a quick way to update the current branch with the latest of `main`.
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `g merge NAME/ALIAS` | `g m NAME/ALIAS` | Merge the given branch into the current branch (`git merge`) |
+| `g merge` | `g m` | Merge the configured default branch into the current branch |
+| `g merge NAME/ALIAS --rebase` | `g m NAME/ALIAS -r` | Rebase the current branch onto the given branch (`git rebase`) |
+| `g merge --continue` / `g merge --abort` | | Continue/abort an in-progress merge or rebase |
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--rebase` | `-r` | Use `git rebase` instead of `git merge` |
+| `--squash` | `-s` | Squash the merged commits (`git merge --squash`; incompatible with `--rebase`) |
+| `--no-verify` | `-n` | Skip git hooks (`git merge --no-verify`; incompatible with `--rebase`) |
+| `--fetch` | `-f` | Fetch the latest of the branch from `origin` before merging/rebasing |
+| `--ff-only` | | Refuse to merge unless it can be fast-forwarded (incompatible with `--rebase`) |
+| `--no-ff` | | Always create a merge commit (incompatible with `--rebase`) |
+| `--abort` | | Abort an in-progress merge or rebase |
+| `--continue` | | Continue an in-progress merge or rebase after resolving conflicts |
+
+When a merge or rebase stops due to conflicts, resolve them and run `g m --continue` to finish, or `g m --abort` to cancel. git's output (conflicts, editor) streams directly to your terminal, so it behaves exactly like running git by hand.
 
 ### Worktrees
 

@@ -1,12 +1,13 @@
 # Version Change Logs
 
+### Version 3.3.0
+> Add `g merge` command for merging/rebasing branches by alias (#38)
+
 ### Version 3.2.7
 > Register branch with alias after successful worktree creation (#37)
 
 ### Version 3.2.5
 > log git commands in verbose mode (#33)
-
-Co-authored-by: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 ### Version 3.2.4
 > enhance GetRepositoryName to use gitCommonDir for accurate repo name resolution (#32)
