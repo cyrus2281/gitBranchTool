@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.3.0
+> Add `g merge` command for merging/rebasing branches by alias
+
 ### Version 3.2.7
 > Register branch with alias after successful worktree creation (#37)
 
