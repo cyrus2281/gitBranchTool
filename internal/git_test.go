@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -446,5 +447,159 @@ func TestGetRepositoryPath(t *testing.T) {
 	resolvedPath, _ := filepath.EvalSymlinks(path)
 	if resolvedPath != resolvedDir {
 		t.Errorf("expected %q, got %q", resolvedDir, resolvedPath)
+	}
+}
+
+// --- merge / rebase / fetch tests ---
+
+// commitFile writes content to file in dir and commits it.
+func commitFile(t *testing.T, dir, file, content, msg string) {
+	t.Helper()
+	if err := os.WriteFile(filepath.Join(dir, file), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, dir, "add", file)
+	runGit(t, dir, "commit", "-m", msg)
+}
+
+func TestMergeBranch_FastForward(t *testing.T) {
+	dir := initTestRepo(t)
+	def := strings.TrimSpace(runGit(t, dir, "branch", "--show-current"))
+	runGit(t, dir, "checkout", "-b", "feature")
+	commitFile(t, dir, "feat.txt", "x", "feat commit")
+	runGit(t, dir, "checkout", def)
+
+	origDir, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(origDir)
+
+	g := Git{}
+	if err := g.MergeBranch("feature", nil); err != nil {
+		t.Fatalf("MergeBranch failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "feat.txt")); err != nil {
+		t.Errorf("expected feat.txt merged into current branch: %v", err)
+	}
+}
+
+func TestRebaseBranch(t *testing.T) {
+	dir := initTestRepo(t)
+	def := strings.TrimSpace(runGit(t, dir, "branch", "--show-current"))
+	runGit(t, dir, "checkout", "-b", "feature")
+	commitFile(t, dir, "f.txt", "f", "f commit")
+	runGit(t, dir, "checkout", def)
+	commitFile(t, dir, "d.txt", "d", "d commit")
+	runGit(t, dir, "checkout", "feature")
+
+	origDir, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(origDir)
+
+	g := Git{}
+	if err := g.RebaseBranch(def); err != nil {
+		t.Fatalf("RebaseBranch failed: %v", err)
+	}
+	for _, f := range []string{"d.txt", "f.txt"} {
+		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
+			t.Errorf("expected %s present after rebase: %v", f, err)
+		}
+	}
+}
+
+func TestMergeInProgress_AndAbort(t *testing.T) {
+	dir := initTestRepo(t)
+	def := strings.TrimSpace(runGit(t, dir, "branch", "--show-current"))
+	commitFile(t, dir, "c.txt", "base\n", "base")
+	runGit(t, dir, "checkout", "-b", "feature")
+	commitFile(t, dir, "c.txt", "feature\n", "feature change")
+	runGit(t, dir, "checkout", def)
+	commitFile(t, dir, "c.txt", "default\n", "default change")
+
+	origDir, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(origDir)
+
+	g := Git{}
+	if g.MergeInProgress() {
+		t.Error("expected no merge in progress initially")
+	}
+	if err := g.MergeBranch("feature", nil); err == nil {
+		t.Fatal("expected merge to conflict")
+	}
+	if !g.MergeInProgress() {
+		t.Error("expected merge in progress after conflict")
+	}
+	if g.RebaseInProgress() {
+		t.Error("did not expect rebase in progress during a merge")
+	}
+	if err := g.MergeAbort(); err != nil {
+		t.Fatalf("MergeAbort failed: %v", err)
+	}
+	if g.MergeInProgress() {
+		t.Error("expected merge aborted")
+	}
+}
+
+func TestRebaseInProgress_AndAbort(t *testing.T) {
+	dir := initTestRepo(t)
+	def := strings.TrimSpace(runGit(t, dir, "branch", "--show-current"))
+	commitFile(t, dir, "c.txt", "base\n", "base")
+	runGit(t, dir, "checkout", "-b", "feature")
+	commitFile(t, dir, "c.txt", "feature\n", "feature change")
+	runGit(t, dir, "checkout", def)
+	commitFile(t, dir, "c.txt", "default\n", "default change")
+	runGit(t, dir, "checkout", "feature")
+
+	origDir, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(origDir)
+
+	g := Git{}
+	if err := g.RebaseBranch(def); err == nil {
+		t.Fatal("expected rebase to conflict")
+	}
+	if !g.RebaseInProgress() {
+		t.Error("expected rebase in progress after conflict")
+	}
+	if err := g.RebaseAbort(); err != nil {
+		t.Fatalf("RebaseAbort failed: %v", err)
+	}
+	if g.RebaseInProgress() {
+		t.Error("expected rebase aborted")
+	}
+}
+
+func TestGetGitDir(t *testing.T) {
+	dir := initTestRepo(t)
+	origDir, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(origDir)
+
+	g := Git{}
+	gitDir, err := g.GetGitDir()
+	if err != nil {
+		t.Fatalf("GetGitDir failed: %v", err)
+	}
+	if gitDir == "" {
+		t.Error("expected non-empty git dir")
+	}
+}
+
+func TestFetch(t *testing.T) {
+	remote := initTestRepo(t)
+	def := strings.TrimSpace(runGit(t, remote, "branch", "--show-current"))
+	commitFile(t, remote, "r.txt", "r", "remote commit")
+
+	dir := initTestRepo(t)
+	origDir, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(origDir)
+
+	g := Git{}
+	if err := g.Fetch(remote, def); err != nil {
+		t.Fatalf("Fetch failed: %v", err)
+	}
+	if got := strings.TrimSpace(runGit(t, dir, "rev-parse", "FETCH_HEAD")); got == "" {
+		t.Error("expected FETCH_HEAD to resolve after fetch")
 	}
 }
