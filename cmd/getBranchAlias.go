@@ -15,6 +15,9 @@ var getBranchAliasCmd = &cobra.Command{
 	Long:    `Gets the branch alias`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"get-branch-alias", "gbr"},
+	Annotations: map[string]string{
+		manualAnnotation: `Print the alias registered for the given branch NAME.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		if position == 1 {

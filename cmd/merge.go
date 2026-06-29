@@ -30,6 +30,10 @@ Examples:
 	g merge --continue      Continue after resolving conflicts`,
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: []string{"m"},
+	Annotations: map[string]string{
+		manualAnnotation: `Merge (or rebase) the branch with the given NAME/ALIAS into the current branch. With no argument, uses the configured default branch (a quick way to sync the current branch with main).
+Flags: -r/--rebase, -s/--squash, -f/--fetch (fetch from origin first), --ff-only, --no-ff, -n/--no-verify, --continue and --abort (for an in-progress merge/rebase).`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		if position == 1 {

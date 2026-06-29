@@ -11,6 +11,9 @@ var listCmd = &cobra.Command{
 	Short:   "Lists all branches with their name, alias, and notes",
 	Long:    `Lists all branches with their name, alias, and notes`,
 	Aliases: []string{"ls", "l"},
+	Annotations: map[string]string{
+		manualAnnotation: `List all registered branches with their name, alias, note, and any associated worktree.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	},

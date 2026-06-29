@@ -17,6 +17,9 @@ var resolveAliasCmd = &cobra.Command{
 	Example: git merge $(g r ALIAS)`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"resolve-alias", "r"},
+	Annotations: map[string]string{
+		manualAnnotation: `Print the branch name that an ALIAS maps to. Useful in scripts, e.g. git merge $(g r ALIAS).`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		if position == 1 {

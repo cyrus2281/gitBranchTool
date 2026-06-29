@@ -28,6 +28,9 @@ var getCmd = &cobra.Command{
 
 - get delete-branches-worktree: Get the delete-branches-worktree setting
 `,
+	Annotations: map[string]string{
+		manualAnnotation: `Read a configuration value. Sub-commands: default-branch, local-prefix, global-prefix, home, worktree-path, delete-branches-worktree.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		commands := []string{"default-branch", "local-prefix", "global-prefix", "home", "worktree-path", "delete-branches-worktree"}

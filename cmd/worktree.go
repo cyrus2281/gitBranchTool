@@ -28,6 +28,10 @@ var worktreeCmd = &cobra.Command{
 	Example: g worktree prune
 `,
 	Aliases: []string{"w"},
+	Annotations: map[string]string{
+		manualAnnotation: `Manage git worktrees. Run with no sub-command to list the current worktrees.
+Sub-commands: create ALIAS [BRANCH] [...NOTE] (new worktree), list, delete [...PATH|ALIAS] [-f/--force], prune (remove stale entries).`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"create", "list", "delete", "prune"}, cobra.ShellCompDirectiveNoFileComp
 	},
