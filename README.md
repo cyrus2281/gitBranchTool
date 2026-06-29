@@ -22,7 +22,11 @@
     - [Linux/MacOS](#linuxmacos)
     - [Windows PowerShell](#windows-powershell-2)
   - [Commands](#commands)
+    - [Merge](#merge)
     - [Worktrees](#worktrees)
+      - [Worktree Commands](#worktree-commands)
+      - [Worktree Integration with Branch Commands](#worktree-integration-with-branch-commands)
+      - [Worktree Settings](#worktree-settings)
   - [Examples](#examples)
   - [Contributing](#contributing)
     - [Contributors](#contributors)
@@ -395,16 +399,6 @@ If you have any suggestions or issues, please open an issue or a pull request.
 
 In your pull request, please include a description of the changes you made and why you made them, and update the [CHANGE_LOGS.md](./CHANGE_LOGS.md), [VERSION](./VERSION), and [README.md](./README.md) (to contributors section) files accordingly.
 
-For versioning
-
-- Patch version: Bug fixes, performance improvements, etc.
-- Minor version: New features, new commands.
-- Major version: Major breaking changes, change of interface, backward incompatible changes
-
-Version need to be updated in following files (Use search and replace all):
-
-- [internal/version.go line 3](./internal/version.go#L3)
-- [CHANGE_LOGS.md line 3](./CHANGE_LOGS.md#L3) [You need to add your own, don't delete the existing one]
 
 ### Contributors
 
