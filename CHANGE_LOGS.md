@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.4.0
+> add `g man` command for an LLM-friendly usage guide (#40)
+
 ### Version 3.3.0
 > Add `g merge` command for merging/rebasing branches by alias
 
