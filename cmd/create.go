@@ -18,6 +18,10 @@ var createCmd = &cobra.Command{
 	`,
 	Aliases: []string{"c"},
 	Args:    cobra.MinimumNArgs(2),
+	Annotations: map[string]string{
+		manualAnnotation: `Create a new git branch, register it under a short ALIAS (with an optional NOTE), and switch to it.
+Flags: -o/--only-create (create without switching), -w/--worktree[=ALIAS] (also create a worktree for the branch).`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	},

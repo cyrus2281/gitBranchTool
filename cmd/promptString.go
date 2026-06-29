@@ -17,6 +17,9 @@ var promptStringCmd = &cobra.Command{
 	Short:  "Returns the prompt string - used for the custom prompt",
 	Long:   `Returns the prompt string - used for the custom prompt`,
 	Hidden: true,
+	Annotations: map[string]string{
+		manualAnnotation: `Internal helper that prints the shell prompt string for g's custom prompt integration. Not intended for direct use.`,
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		prompt := ""
 		if runtime.GOOS == "windows" {

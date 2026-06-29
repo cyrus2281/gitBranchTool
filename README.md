@@ -29,6 +29,7 @@
       - [Worktree Settings](#worktree-settings)
   - [Examples](#examples)
   - [Contributing](#contributing)
+    - [Commit Message Guidelines](#commit-message-guidelines)
     - [Contributors](#contributors)
   - [License](#license)
 
@@ -171,6 +172,7 @@ Available Commands:
   getBranchAlias   Gets the branch alias
   help             Help about any command
   list             Lists all branches with their name, alias, and notes
+  man              Prints an LLM-friendly guide on how to use this tool
   merge            Merges or rebases the given branch into the current branch
   removeEntry      Removes a registered branch entry without deleting the branch
   rename           Updates the alias for the given branch name
@@ -189,6 +191,19 @@ Flags:
 
 Use "g [command] --help" for more information about a command.
 ```
+
+### Manual (LLM Guide)
+
+`g man` (alias `g manual`) prints a concise, LLM-friendly guide describing how to use the tool. It is meant to be dropped into an AI assistant's context so it can drive `g` without reading every `--help` page.
+
+By default it documents only the core commands (`create`, `delete`, `switch`, `merge`, `currentBranch`, `list`, `worktree`) — the minimum needed to be productive. Pass `--full` to document every command instead.
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `g man` | `g manual` | Print the guide for the core commands |
+| `g man --full` | `g man -f` | Print the guide for every command |
+
+The guide is assembled from a short manual that each command carries, and always reminds the reader to run `g <command> --help` for full flag-level details.
 
 ### Merge
 
@@ -399,6 +414,17 @@ If you have any suggestions or issues, please open an issue or a pull request.
 
 In your pull request, please include a description of the changes you made and why you made them, and update the [CHANGE_LOGS.md](./CHANGE_LOGS.md), [VERSION](./VERSION), and [README.md](./README.md) (to contributors section) files accordingly.
 
+### Commit Message Guidelines
+Please use the [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification for all commit messages and pull request titles.
+Format your messages as follows: <type>(<scope>): <description>
+
+* feat: A new feature for the user.
+* fix: A bug fix for the user.
+* chore: Routine tasks, maintenance, or dependency updates.
+* docs: Documentation changes only.
+* refactor: Code changes that neither fix a bug nor add a feature.
+
+Example: feat(auth): add google oauth2 login flow
 
 ### Contributors
 

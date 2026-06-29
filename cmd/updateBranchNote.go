@@ -12,6 +12,9 @@ var updateBranchNoteCmd = &cobra.Command{
 	Short: "Adds/updates the notes for a branch base on name/alias",
 	Long:  `Adds/updates the notes for a branch base on name/alias`,
 	Args:  cobra.MinimumNArgs(2),
+	Annotations: map[string]string{
+		manualAnnotation: `Add or update the NOTE for a branch identified by NAME or ALIAS.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		if position == 1 {

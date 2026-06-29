@@ -33,6 +33,9 @@ Default is "./worktrees/{alias}" (Run command with no argument to reset to defau
 true: auto-delete worktree, false: never auto-delete, null: prompt user (default)
 	Example: g set delete-branches-worktree true
 `,
+	Annotations: map[string]string{
+		manualAnnotation: `Change a configuration value. Sub-commands: default-branch <NAME>, local-prefix <PREFIX>, global-prefix <PREFIX>, worktree-path <TEMPLATE>, delete-branches-worktree <true|false|null>.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		commands := []string{"default-branch", "local-prefix", "global-prefix", "worktree-path", "delete-branches-worktree"}

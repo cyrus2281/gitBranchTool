@@ -13,6 +13,9 @@ var renameCmd = &cobra.Command{
 	Long:    `Updates the alias for the given branch name.`,
 	Args:    cobra.ExactArgs(2),
 	Aliases: []string{"mv", "updateBranchAlias", "update-branch-alias", "uba"},
+	Annotations: map[string]string{
+		manualAnnotation: `Change the registered ALIAS for the given branch NAME.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		if position == 1 {

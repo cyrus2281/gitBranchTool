@@ -18,6 +18,10 @@ var deleteCmd = &cobra.Command{
 	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"`,
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"del", "d"},
+	Annotations: map[string]string{
+		manualAnnotation: `Delete one or more registered branches by NAME or ALIAS, removing both the git branch and its registry entry.
+Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the remote branch), --remote-only, -i/--ignore-errors, -w/--worktree (also remove its worktree).`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return internal.GetBranchesAndAliases()
 	},

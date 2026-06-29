@@ -20,6 +20,11 @@ For example:
 	g switch NAME ALIAS [...NOTE]`,
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"checkout", "check", "s"},
+	Annotations: map[string]string{
+		manualAnnotation: `Switch to the branch with the given NAME or ALIAS (git checkout).
+Can also register and switch to a new branch in one step: g switch NAME ALIAS [...NOTE].
+Flag: -w/--worktree[=ALIAS] to find or create a worktree for the branch.`,
+	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		position := len(args) + 1
 		if position == 1 {
