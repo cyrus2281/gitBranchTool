@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.4.0
+> add `g merge` command (#38) (#39)
+
 ### Version 3.3.0
 > Add `g merge` command for merging/rebasing branches by alias (#38)
 
