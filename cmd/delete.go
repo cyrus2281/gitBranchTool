@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/cyrus2281/gitBranchTool/internal"
 	"github.com/cyrus2281/go-logger"
@@ -15,12 +16,15 @@ var deleteCmd = &cobra.Command{
 	Long: `Deletes listed branches base on name or alias (requires at least one name/alias)"
 
 	Without safe-delete uses the git command \"git branch -D [...NAME|ALIAS] \"
-	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"`,
+	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"
+
+	With --regex/-e, the arguments are treated as regular expressions and every
+	registered branch whose name or alias matches is deleted.`,
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"del", "d"},
 	Annotations: map[string]string{
 		manualAnnotation: `Delete one or more registered branches by NAME or ALIAS, removing both the git branch and its registry entry.
-Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the remote branch), --remote-only, -i/--ignore-errors, -w/--worktree (also remove its worktree).`,
+Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the remote branch), --remote-only, -i/--ignore-errors, -w/--worktree (also remove its worktree), -e/--regex (treat arguments as regular expressions matched against branch names and aliases).`,
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return internal.GetBranchesAndAliases()
@@ -36,7 +40,17 @@ Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the
 		remote, _ := cmd.Flags().GetBool("remote")
 		remoteOnly, _ := cmd.Flags().GetBool("remote-only")
 		forceWorktree, _ := cmd.Flags().GetBool("worktree")
+		regex, _ := cmd.Flags().GetBool("regex")
 		repoBranches := internal.GetRepositoryBranches()
+
+		targets, err := resolveDeleteTargets(&repoBranches, args, regex)
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		if regex && len(targets) == 0 {
+			logger.InfoF("No registered branches matched the given pattern(s)\n")
+			return
+		}
 
 		deleteBranchesWorktree := internal.GetConfig(internal.DELETE_BRANCHES_WORKTREE_KEY)
 		var worktreeMap map[string]string
@@ -47,7 +61,7 @@ Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the
 			}
 		}
 
-		for _, item := range args {
+		for _, item := range targets {
 			shouldDeleteWt := false
 			if worktreeMap != nil {
 				branch, ok := repoBranches.GetBranchByNameOrAlias(item)
@@ -90,6 +104,42 @@ type deleteOpts struct {
 	RemoteOnly           bool
 	ShouldDeleteWorktree bool
 	WorktreeMap          map[string]string
+}
+
+// resolveDeleteTargets expands the provided args into the list of items to delete.
+// When useRegex is false, the args are returned unchanged (each treated as a
+// literal NAME or ALIAS). When useRegex is true, each arg is compiled as a
+// regular expression and matched against every registered branch's name and
+// alias; the names of all matching branches are returned (de-duplicated, in
+// registry order).
+func resolveDeleteTargets(repoBranches *internal.RepositoryBranches, args []string, useRegex bool) ([]string, error) {
+	if !useRegex {
+		return args, nil
+	}
+
+	patterns := make([]*regexp.Regexp, 0, len(args))
+	for _, arg := range args {
+		re, err := regexp.Compile(arg)
+		if err != nil {
+			return nil, fmt.Errorf("invalid regular expression \"%v\": %w", arg, err)
+		}
+		patterns = append(patterns, re)
+	}
+
+	seen := make(map[string]bool)
+	targets := []string{}
+	for _, branch := range repoBranches.GetBranches() {
+		for _, re := range patterns {
+			if re.MatchString(branch.Name) || re.MatchString(branch.Alias) {
+				if !seen[branch.Name] {
+					seen[branch.Name] = true
+					targets = append(targets, branch.Name)
+				}
+				break
+			}
+		}
+	}
+	return targets, nil
 }
 
 func executeDeleteBranch(git *internal.Git, repoBranches *internal.RepositoryBranches,
@@ -147,4 +197,5 @@ func init() {
 	deleteCmd.Flags().BoolP("remote", "r", false, "Delete the remote branch as well")
 	deleteCmd.Flags().Bool("remote-only", false, "Deletes only the remote branch. Local branch and registry entry are not removed")
 	deleteCmd.Flags().BoolP("worktree", "w", false, "Also delete the associated worktree")
+	deleteCmd.Flags().BoolP("regex", "e", false, "Treat the arguments as regular expressions matched against branch names and aliases")
 }

@@ -172,6 +172,105 @@ func TestExecuteDeleteBranch_MultipleInSequence(t *testing.T) {
 	}
 }
 
+func TestResolveDeleteTargets_NoRegexReturnsArgsUnchanged(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "feature/a", Alias: "a"})
+
+	args := []string{"feature/a", "b", "nonexistent"}
+	targets, err := resolveDeleteTargets(store, args, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(targets) != len(args) {
+		t.Fatalf("expected args returned unchanged, got %v", targets)
+	}
+	for i, v := range args {
+		if targets[i] != v {
+			t.Errorf("expected targets[%d]=%q, got %q", i, v, targets[i])
+		}
+	}
+}
+
+func TestResolveDeleteTargets_MatchesByName(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "claude/one", Alias: "c1"})
+	store.AddBranch(internal.Branch{Name: "claude/two", Alias: "c2"})
+	store.AddBranch(internal.Branch{Name: "feature/keep", Alias: "keep"})
+
+	targets, err := resolveDeleteTargets(store, []string{"claude.*"}, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(targets) != 2 {
+		t.Fatalf("expected 2 matches, got %d (%v)", len(targets), targets)
+	}
+	for _, name := range targets {
+		if name == "feature/keep" {
+			t.Error("non-matching branch should not be a target")
+		}
+	}
+}
+
+func TestResolveDeleteTargets_MatchesByAlias(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "feature/login", Alias: "rel-1/beta"})
+	store.AddBranch(internal.Branch{Name: "feature/logout", Alias: "rel-9/beta"})
+
+	targets, err := resolveDeleteTargets(store, []string{"rel-[1-3]/beta"}, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(targets) != 1 || targets[0] != "feature/login" {
+		t.Fatalf("expected only feature/login matched by alias, got %v", targets)
+	}
+}
+
+func TestResolveDeleteTargets_MultiplePatternsDeduped(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "cyrus/jira-1", Alias: "j1"})
+	store.AddBranch(internal.Branch{Name: "cyrus/jira-2", Alias: "j2"})
+	store.AddBranch(internal.Branch{Name: "rel-2/beta", Alias: "rb"})
+
+	// Two patterns; "cyrus/.*" also overlaps nothing with the second, but the
+	// branch order must be preserved and no branch may appear twice.
+	targets, err := resolveDeleteTargets(store, []string{"cyrus/.*", "rel-[1-3]/beta"}, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(targets) != 3 {
+		t.Fatalf("expected 3 matches, got %d (%v)", len(targets), targets)
+	}
+	expected := []string{"cyrus/jira-1", "cyrus/jira-2", "rel-2/beta"}
+	for i, name := range expected {
+		if targets[i] != name {
+			t.Errorf("expected targets[%d]=%q, got %q", i, name, targets[i])
+		}
+	}
+}
+
+func TestResolveDeleteTargets_NoMatches(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "feature/a", Alias: "a"})
+
+	targets, err := resolveDeleteTargets(store, []string{"nomatch.*"}, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(targets) != 0 {
+		t.Errorf("expected no matches, got %v", targets)
+	}
+}
+
+func TestResolveDeleteTargets_InvalidRegex(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "feature/a", Alias: "a"})
+
+	_, err := resolveDeleteTargets(store, []string{"["}, true)
+	if err == nil {
+		t.Error("expected an error for an invalid regular expression")
+	}
+}
+
 func TestExecuteDeleteBranch_SafeDelete(t *testing.T) {
 	repoDir := initTestRepo(t)
 	chdir(t, repoDir)

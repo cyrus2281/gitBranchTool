@@ -317,6 +317,15 @@ g d banner
 g d banner cyrus/jira-50930
 ```
 
+- **Delete branches matching a regular expression**
+
+With `--regex`/`-e`, the arguments are treated as regular expressions and every registered branch whose name or alias matches is deleted.
+
+```bash
+g d -e "claude.*"
+g d -e "cyrus/.*" "rel-[1-3]/beta"
+```
+
 - **Set branch name prefix for current repository**
 
 ```bash
