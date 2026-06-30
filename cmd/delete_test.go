@@ -177,7 +177,7 @@ func TestResolveDeleteTargets_NoRegexReturnsArgsUnchanged(t *testing.T) {
 	store.AddBranch(internal.Branch{Name: "feature/a", Alias: "a"})
 
 	args := []string{"feature/a", "b", "nonexistent"}
-	targets, err := resolveDeleteTargets(store, args, false)
+	targets, err := resolveDeleteTargets(store, nil, args, false, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestResolveDeleteTargets_MatchesByName(t *testing.T) {
 	store.AddBranch(internal.Branch{Name: "claude/two", Alias: "c2"})
 	store.AddBranch(internal.Branch{Name: "feature/keep", Alias: "keep"})
 
-	targets, err := resolveDeleteTargets(store, []string{"claude.*"}, true)
+	targets, err := resolveDeleteTargets(store, nil, []string{"claude.*"}, true, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -216,7 +216,7 @@ func TestResolveDeleteTargets_MatchesByAlias(t *testing.T) {
 	store.AddBranch(internal.Branch{Name: "feature/login", Alias: "rel-1/beta"})
 	store.AddBranch(internal.Branch{Name: "feature/logout", Alias: "rel-9/beta"})
 
-	targets, err := resolveDeleteTargets(store, []string{"rel-[1-3]/beta"}, true)
+	targets, err := resolveDeleteTargets(store, nil, []string{"rel-[1-3]/beta"}, true, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -233,7 +233,7 @@ func TestResolveDeleteTargets_MultiplePatternsDeduped(t *testing.T) {
 
 	// Two patterns; "cyrus/.*" also overlaps nothing with the second, but the
 	// branch order must be preserved and no branch may appear twice.
-	targets, err := resolveDeleteTargets(store, []string{"cyrus/.*", "rel-[1-3]/beta"}, true)
+	targets, err := resolveDeleteTargets(store, nil, []string{"cyrus/.*", "rel-[1-3]/beta"}, true, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -252,7 +252,7 @@ func TestResolveDeleteTargets_NoMatches(t *testing.T) {
 	store := newTestStore(t)
 	store.AddBranch(internal.Branch{Name: "feature/a", Alias: "a"})
 
-	targets, err := resolveDeleteTargets(store, []string{"nomatch.*"}, true)
+	targets, err := resolveDeleteTargets(store, nil, []string{"nomatch.*"}, true, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -265,9 +265,87 @@ func TestResolveDeleteTargets_InvalidRegex(t *testing.T) {
 	store := newTestStore(t)
 	store.AddBranch(internal.Branch{Name: "feature/a", Alias: "a"})
 
-	_, err := resolveDeleteTargets(store, []string{"["}, true)
+	_, err := resolveDeleteTargets(store, nil, []string{"["}, true, false)
 	if err == nil {
 		t.Error("expected an error for an invalid regular expression")
+	}
+}
+
+func TestResolveDeleteTargets_AllRegexMatchesUnregistered(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "claude/one", Alias: "c1"})
+
+	gitBranches := []string{"claude/one", "claude/two", "main"}
+	targets, err := resolveDeleteTargets(store, gitBranches, []string{"claude/.*"}, true, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Registered "claude/one" comes first, then the unregistered "claude/two".
+	expected := []string{"claude/one", "claude/two"}
+	if len(targets) != len(expected) {
+		t.Fatalf("expected %v, got %v", expected, targets)
+	}
+	for i, name := range expected {
+		if targets[i] != name {
+			t.Errorf("expected targets[%d]=%q, got %q", i, name, targets[i])
+		}
+	}
+}
+
+func TestResolveDeleteTargets_AllFalseIgnoresUnregistered(t *testing.T) {
+	store := newTestStore(t)
+	store.AddBranch(internal.Branch{Name: "claude/one", Alias: "c1"})
+
+	gitBranches := []string{"claude/one", "claude/two"}
+	// all=false → the unregistered "claude/two" must not be matched.
+	targets, err := resolveDeleteTargets(store, gitBranches, []string{"claude/.*"}, true, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(targets) != 1 || targets[0] != "claude/one" {
+		t.Fatalf("expected only registered claude/one, got %v", targets)
+	}
+}
+
+func TestExecuteDeleteBranch_AllDeletesUnregistered(t *testing.T) {
+	repoDir := initTestRepo(t)
+	chdir(t, repoDir)
+	store := newTestStore(t)
+	git := internal.Git{}
+
+	// Branch exists in git but is not registered with g.
+	git.CreateNewBranch("feature/unregistered")
+
+	executeDeleteBranch(&git, store, "feature/unregistered", deleteOpts{Force: true, All: true})
+
+	branches, _ := git.GetBranches()
+	for _, b := range branches {
+		if b == "feature/unregistered" {
+			t.Error("unregistered branch should be deleted from git with --all")
+		}
+	}
+}
+
+func TestExecuteDeleteBranch_UnregisteredSkippedWithoutAll(t *testing.T) {
+	repoDir := initTestRepo(t)
+	chdir(t, repoDir)
+	store := newTestStore(t)
+	git := internal.Git{}
+
+	git.CreateNewBranch("feature/unregistered")
+
+	// Without --all an unregistered branch is reported as not found and kept.
+	executeDeleteBranch(&git, store, "feature/unregistered", deleteOpts{Force: true})
+
+	branches, _ := git.GetBranches()
+	found := false
+	for _, b := range branches {
+		if b == "feature/unregistered" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("unregistered branch should remain when --all is not set")
 	}
 }
 

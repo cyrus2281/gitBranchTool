@@ -299,6 +299,14 @@ g a cyrus/jira-60083 banner "Adds banner to the home page"
 g l
 ```
 
+- **List registered and unregistered branches**
+
+With `--all`/`-a`, the registered branches are listed first (with their alias and note), followed by every other local git branch with an empty alias and note.
+
+```bash
+g l -a
+```
+
 - **Switch to branch**
 
 ```bash
@@ -324,6 +332,15 @@ With `--regex`/`-e`, the arguments are treated as regular expressions and every 
 ```bash
 g d -e "claude.*"
 g d -e "cyrus/.*" "rel-[1-3]/beta"
+```
+
+- **Delete branches that are not registered with `g`**
+
+With `--all`/`-a`, the candidate list is expanded with every local git branch before the search runs, so branches that were never registered with `g` can be deleted by name or by regex. Combine it with `-e` to clean up unregistered branches in bulk.
+
+```bash
+g d -a old-experiment
+g d -a -e "claude/.*"
 ```
 
 - **Set branch name prefix for current repository**

@@ -12,17 +12,26 @@ var listCmd = &cobra.Command{
 	Long:    `Lists all branches with their name, alias, and notes`,
 	Aliases: []string{"ls", "l"},
 	Annotations: map[string]string{
-		manualAnnotation: `List all registered branches with their name, alias, note, and any associated worktree.`,
+		manualAnnotation: `List all registered branches with their name, alias, note, and any associated worktree.
+Flags: -a/--all (also list local git branches that are not registered with g, shown with empty alias and note after the registered ones).`,
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		all, _ := cmd.Flags().GetBool("all")
 		repoBranches := internal.GetRepositoryBranches()
 		branches := repoBranches.GetBranches()
 
-		// Check git worktree list for ANY worktrees (not just stored ones)
 		git := internal.Git{}
+
+		// With --all, append every local git branch that is not registered,
+		// listed after the registered branches with empty alias and note.
+		if all {
+			branches = appendUnregisteredBranches(&git, branches)
+		}
+
+		// Check git worktree list for ANY worktrees (not just stored ones)
 		worktreeListOutput, _ := git.WorktreeList()
 		worktreeMap := internal.ParseWorktreeList(worktreeListOutput)
 
@@ -41,7 +50,7 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		// Determine if any registered branch has a worktree
+		// Determine if any listed branch has a worktree
 		hasWorktrees := false
 		for _, branch := range branches {
 			if _, ok := branchToWorktreeInfo[branch.Name]; ok {
@@ -68,6 +77,32 @@ var listCmd = &cobra.Command{
 	},
 }
 
+// appendUnregisteredBranches returns a new slice containing every registered
+// branch followed by each local git branch that is not already registered.
+// Unregistered branches carry only their name (empty alias and note). If the
+// git branch list cannot be read, the registered branches are returned as-is.
+func appendUnregisteredBranches(git *internal.Git, registered []internal.Branch) []internal.Branch {
+	result := make([]internal.Branch, len(registered))
+	copy(result, registered)
+
+	gitBranches, err := git.GetBranches()
+	if err != nil {
+		return result
+	}
+
+	registeredNames := make(map[string]bool, len(registered))
+	for _, b := range registered {
+		registeredNames[b.Name] = true
+	}
+	for _, name := range gitBranches {
+		if !registeredNames[name] {
+			result = append(result, internal.Branch{Name: name})
+		}
+	}
+	return result
+}
+
 func init() {
 	rootCmd.AddCommand(listCmd)
+	listCmd.Flags().BoolP("all", "a", false, "Also list local git branches that are not registered with g (shown with empty alias and note)")
 }
