@@ -42,7 +42,12 @@ func ResolveWorktreePath(template, repoRoot, repoName, alias, branch string) str
 }
 
 // ParseWorktreeList parses the output of `git worktree list --porcelain`
-// Returns a map of worktree path to branch name
+// Returns a map of worktree path to branch name.
+//
+// The main repository is NOT a worktree, so it is excluded from the result.
+// `git worktree list` always lists the main working tree as the first entry
+// (even when invoked from inside a linked worktree), so that first entry is
+// skipped. Only linked worktrees are returned.
 func ParseWorktreeList(output string) map[string]string {
 	result := make(map[string]string)
 	if output == "" {
@@ -51,20 +56,31 @@ func ParseWorktreeList(output string) map[string]string {
 
 	lines := strings.Split(output, "\n")
 	currentPath := ""
+	// The first "worktree" entry is the main working tree (the repository
+	// itself), which is not a linked worktree and must be skipped.
+	isMainWorktree := true
+	skipCurrent := false
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "worktree ") {
 			currentPath = strings.TrimPrefix(line, "worktree ")
-			if currentPath != "" {
-				// Record immediately so detached worktrees (no branch line) are preserved
-				result[currentPath] = ""
+			if isMainWorktree {
+				// Skip the main repository's entry entirely.
+				skipCurrent = true
+				isMainWorktree = false
+			} else {
+				skipCurrent = false
+				if currentPath != "" {
+					// Record immediately so detached worktrees (no branch line) are preserved
+					result[currentPath] = ""
+				}
 			}
 		} else if strings.HasPrefix(line, "branch ") {
 			branchRef := strings.TrimPrefix(line, "branch ")
 			// Convert refs/heads/branch-name to branch-name
 			branchName := strings.TrimPrefix(branchRef, "refs/heads/")
-			if currentPath != "" {
+			if currentPath != "" && !skipCurrent {
 				result[currentPath] = branchName
 			}
 		} else if line == "" {
