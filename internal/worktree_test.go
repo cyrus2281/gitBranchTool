@@ -14,15 +14,30 @@ func TestParseWorktreeList_EmptyString(t *testing.T) {
 	}
 }
 
-func TestParseWorktreeList_SingleWorktree(t *testing.T) {
+func TestParseWorktreeList_OnlyMainWorktree(t *testing.T) {
+	// A repository with no linked worktrees — only the main working tree.
+	// The main repository is not a worktree, so the result must be empty.
 	input := "worktree /home/user/repo\nbranch refs/heads/main\n"
+	result := ParseWorktreeList(input)
+
+	if len(result) != 0 {
+		t.Fatalf("expected 0 entries (main repo is not a worktree), got %d", len(result))
+	}
+}
+
+func TestParseWorktreeList_SingleLinkedWorktree(t *testing.T) {
+	// Main worktree plus one linked worktree; only the linked one is returned.
+	input := "worktree /home/user/repo\nbranch refs/heads/main\n\nworktree /home/user/wt1\nbranch refs/heads/feature-a\n"
 	result := ParseWorktreeList(input)
 
 	if len(result) != 1 {
 		t.Fatalf("expected 1 entry, got %d", len(result))
 	}
-	if result["/home/user/repo"] != "main" {
-		t.Errorf("expected branch 'main', got '%s'", result["/home/user/repo"])
+	if _, ok := result["/home/user/repo"]; ok {
+		t.Error("main repository should be excluded from the result")
+	}
+	if result["/home/user/wt1"] != "feature-a" {
+		t.Errorf("expected branch 'feature-a', got '%s'", result["/home/user/wt1"])
 	}
 }
 
@@ -30,13 +45,17 @@ func TestParseWorktreeList_MultipleWorktrees(t *testing.T) {
 	input := "worktree /home/user/repo\nbranch refs/heads/main\n\nworktree /home/user/wt1\nbranch refs/heads/feature-a\n\nworktree /home/user/wt2\nbranch refs/heads/bugfix-1\n"
 	result := ParseWorktreeList(input)
 
-	if len(result) != 3 {
-		t.Fatalf("expected 3 entries, got %d", len(result))
+	// The main repository (/home/user/repo) is excluded; only the two linked
+	// worktrees remain.
+	if len(result) != 2 {
+		t.Fatalf("expected 2 entries, got %d", len(result))
+	}
+	if _, ok := result["/home/user/repo"]; ok {
+		t.Error("main repository should be excluded from the result")
 	}
 	expected := map[string]string{
-		"/home/user/repo": "main",
-		"/home/user/wt1":  "feature-a",
-		"/home/user/wt2":  "bugfix-1",
+		"/home/user/wt1": "feature-a",
+		"/home/user/wt2": "bugfix-1",
 	}
 	for path, branch := range expected {
 		if result[path] != branch {
@@ -49,11 +68,12 @@ func TestParseWorktreeList_DetachedHead(t *testing.T) {
 	input := "worktree /home/user/repo\nbranch refs/heads/main\n\nworktree /home/user/detached\nHEAD abc123\ndetached\n"
 	result := ParseWorktreeList(input)
 
-	if len(result) != 2 {
-		t.Fatalf("expected 2 entries, got %d", len(result))
+	// Main repository excluded; only the detached linked worktree remains.
+	if len(result) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(result))
 	}
-	if result["/home/user/repo"] != "main" {
-		t.Errorf("expected branch 'main', got '%s'", result["/home/user/repo"])
+	if _, ok := result["/home/user/repo"]; ok {
+		t.Error("main repository should be excluded from the result")
 	}
 	// Detached worktree should have empty branch name
 	if result["/home/user/detached"] != "" {
@@ -62,26 +82,26 @@ func TestParseWorktreeList_DetachedHead(t *testing.T) {
 }
 
 func TestParseWorktreeList_BranchWithSlashes(t *testing.T) {
-	input := "worktree /home/user/repo\nbranch refs/heads/feature/auth/oauth\n"
+	input := "worktree /home/user/repo\nbranch refs/heads/main\n\nworktree /home/user/wt1\nbranch refs/heads/feature/auth/oauth\n"
 	result := ParseWorktreeList(input)
 
 	if len(result) != 1 {
 		t.Fatalf("expected 1 entry, got %d", len(result))
 	}
-	if result["/home/user/repo"] != "feature/auth/oauth" {
-		t.Errorf("expected 'feature/auth/oauth', got '%s'", result["/home/user/repo"])
+	if result["/home/user/wt1"] != "feature/auth/oauth" {
+		t.Errorf("expected 'feature/auth/oauth', got '%s'", result["/home/user/wt1"])
 	}
 }
 
 func TestParseWorktreeList_TrailingNewlines(t *testing.T) {
-	input := "worktree /home/user/repo\nbranch refs/heads/main\n\n\n\n"
+	input := "worktree /home/user/repo\nbranch refs/heads/main\n\nworktree /home/user/wt1\nbranch refs/heads/feature-a\n\n\n\n"
 	result := ParseWorktreeList(input)
 
 	if len(result) != 1 {
 		t.Fatalf("expected 1 entry, got %d", len(result))
 	}
-	if result["/home/user/repo"] != "main" {
-		t.Errorf("expected 'main', got '%s'", result["/home/user/repo"])
+	if result["/home/user/wt1"] != "feature-a" {
+		t.Errorf("expected 'feature-a', got '%s'", result["/home/user/wt1"])
 	}
 }
 
@@ -89,11 +109,12 @@ func TestParseWorktreeList_MixedDetachedAndNormal(t *testing.T) {
 	input := "worktree /repo\nbranch refs/heads/main\n\nworktree /wt-detached\nHEAD abc123\ndetached\n\nworktree /wt-feature\nbranch refs/heads/feature-x\n"
 	result := ParseWorktreeList(input)
 
-	if len(result) != 3 {
-		t.Fatalf("expected 3 entries, got %d", len(result))
+	// Main repository (/repo) excluded; the detached and feature worktrees remain.
+	if len(result) != 2 {
+		t.Fatalf("expected 2 entries, got %d", len(result))
 	}
-	if result["/repo"] != "main" {
-		t.Errorf("expected 'main', got '%s'", result["/repo"])
+	if _, ok := result["/repo"]; ok {
+		t.Error("main repository should be excluded from the result")
 	}
 	if result["/wt-detached"] != "" {
 		t.Errorf("expected empty for detached, got '%s'", result["/wt-detached"])
@@ -104,15 +125,16 @@ func TestParseWorktreeList_MixedDetachedAndNormal(t *testing.T) {
 }
 
 func TestParseWorktreeList_BareWorktreeEntries(t *testing.T) {
-	// Worktree entries with no branch line (bare repos or special states)
+	// Worktree entries with no branch line (bare repos or special states).
+	// The first entry (the bare main repo) is excluded; only /bare2 remains.
 	input := "worktree /bare1\n\nworktree /bare2\n"
 	result := ParseWorktreeList(input)
 
-	if len(result) != 2 {
-		t.Fatalf("expected 2 entries, got %d", len(result))
+	if len(result) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(result))
 	}
-	if result["/bare1"] != "" {
-		t.Errorf("expected empty branch for /bare1, got '%s'", result["/bare1"])
+	if _, ok := result["/bare1"]; ok {
+		t.Error("main (bare) repository should be excluded from the result")
 	}
 	if result["/bare2"] != "" {
 		t.Errorf("expected empty branch for /bare2, got '%s'", result["/bare2"])
