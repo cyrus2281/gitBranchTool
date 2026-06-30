@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.4.1
+> exclude main repository from worktree list (#44)
+
 ### Version 3.4.0
 > add `g man` command for an LLM-friendly usage guide (#40)
 
