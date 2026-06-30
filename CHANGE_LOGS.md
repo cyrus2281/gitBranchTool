@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.5.0
+> add --all flag to `g list` and `g delete` (#45)
+
 ### Version 3.4.2
 > add regex option for `g delete` command (#43)
 
