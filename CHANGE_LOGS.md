@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.4.2
+> add regex option for `g delete` command (#43)
+
 ### Version 3.4.1
 > exclude main repository from worktree list (#44)
 
