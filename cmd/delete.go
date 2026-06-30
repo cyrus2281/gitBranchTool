@@ -19,14 +19,21 @@ var deleteCmd = &cobra.Command{
 	With safe-delete uses the git command \"git branch [...NAME|ALIAS] \"
 
 	With --regex/-e, the arguments are treated as regular expressions and every
-	registered branch whose name or alias matches is deleted.`,
+	registered branch whose name or alias matches is deleted.
+
+	With --all/-a, branches that are not registered with g are also considered:
+	the candidate list is expanded with every local git branch before the
+	search runs, so unregistered branches can be deleted by name or by regex.`,
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"del", "d"},
 	Annotations: map[string]string{
 		manualAnnotation: `Delete one or more registered branches by NAME or ALIAS, removing both the git branch and its registry entry.
-Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the remote branch), --remote-only, -i/--ignore-errors, -w/--worktree (also remove its worktree), -e/--regex (treat arguments as regular expressions matched against branch names and aliases).`,
+Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the remote branch), --remote-only, -i/--ignore-errors, -w/--worktree (also remove its worktree), -e/--regex (treat arguments as regular expressions matched against branch names and aliases), -a/--all (also consider local git branches not registered with g, expanding the candidate list before searching/deleting).`,
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if all, _ := cmd.Flags().GetBool("all"); all {
+			return internal.GetAllBranchesAndAliases()
+		}
 		return internal.GetBranchesAndAliases()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -41,14 +48,21 @@ Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the
 		remoteOnly, _ := cmd.Flags().GetBool("remote-only")
 		forceWorktree, _ := cmd.Flags().GetBool("worktree")
 		regex, _ := cmd.Flags().GetBool("regex")
+		all, _ := cmd.Flags().GetBool("all")
 		repoBranches := internal.GetRepositoryBranches()
 
-		targets, err := resolveDeleteTargets(&repoBranches, args, regex)
+		// With --all, unregistered git branches are also candidates for deletion.
+		var gitBranches []string
+		if all {
+			gitBranches, _ = git.GetBranches()
+		}
+
+		targets, err := resolveDeleteTargets(&repoBranches, gitBranches, args, regex, all)
 		if err != nil {
 			logger.Fatalln(err)
 		}
 		if regex && len(targets) == 0 {
-			logger.InfoF("No registered branches matched the given pattern(s)\n")
+			logger.InfoF("No branches matched the given pattern(s)\n")
 			return
 		}
 
@@ -64,21 +78,25 @@ Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the
 		for _, item := range targets {
 			shouldDeleteWt := false
 			if worktreeMap != nil {
-				branch, ok := repoBranches.GetBranchByNameOrAlias(item)
-				if ok {
-					wtPath := internal.GetWorktreePathForBranch(worktreeMap, branch.Name)
-					if wtPath != "" {
-						if forceWorktree || deleteBranchesWorktree == "true" {
-							shouldDeleteWt = true
-						} else if deleteBranchesWorktree != "false" {
-							logger.InfoF("Branch \"%s\" is checked out in worktree at %s\n", branch.Name, wtPath)
-							logger.InfoF("Delete the worktree as well? (y/n): ")
-							var response string
-							if _, err := fmt.Scanln(&response); err != nil {
-								logger.WarningF("Failed to read response, defaulting to not deleting worktree: %v\n", err)
-							} else {
-								shouldDeleteWt = response == "y" || response == "Y" || response == "yes"
-							}
+				// Resolve to the branch name, falling back to the item itself
+				// so unregistered branches (only reachable with --all) still
+				// have their worktree detected.
+				branchName := item
+				if branch, ok := repoBranches.GetBranchByNameOrAlias(item); ok {
+					branchName = branch.Name
+				}
+				wtPath := internal.GetWorktreePathForBranch(worktreeMap, branchName)
+				if wtPath != "" {
+					if forceWorktree || deleteBranchesWorktree == "true" {
+						shouldDeleteWt = true
+					} else if deleteBranchesWorktree != "false" {
+						logger.InfoF("Branch \"%s\" is checked out in worktree at %s\n", branchName, wtPath)
+						logger.InfoF("Delete the worktree as well? (y/n): ")
+						var response string
+						if _, err := fmt.Scanln(&response); err != nil {
+							logger.WarningF("Failed to read response, defaulting to not deleting worktree: %v\n", err)
+						} else {
+							shouldDeleteWt = response == "y" || response == "Y" || response == "yes"
 						}
 					}
 				}
@@ -91,6 +109,7 @@ Flags: -s/--safe-delete (refuse unmerged branches), -r/--remote (also delete the
 				RemoteOnly:           remoteOnly,
 				ShouldDeleteWorktree: shouldDeleteWt,
 				WorktreeMap:          worktreeMap,
+				All:                  all,
 			}
 			executeDeleteBranch(&git, &repoBranches, item, opts)
 		}
@@ -104,6 +123,9 @@ type deleteOpts struct {
 	RemoteOnly           bool
 	ShouldDeleteWorktree bool
 	WorktreeMap          map[string]string
+	// All allows deleting a git branch that is not registered with g, treating
+	// the item as a raw branch name when it is not found in the registry.
+	All bool
 }
 
 // resolveDeleteTargets expands the provided args into the list of items to delete.
@@ -112,7 +134,12 @@ type deleteOpts struct {
 // regular expression and matched against every registered branch's name and
 // alias; the names of all matching branches are returned (de-duplicated, in
 // registry order).
-func resolveDeleteTargets(repoBranches *internal.RepositoryBranches, args []string, useRegex bool) ([]string, error) {
+//
+// When all is true, the regex search is additionally run against gitBranches
+// (the local git branch names), so unregistered branches matched by a pattern
+// are appended after the registered matches. all has no effect when useRegex
+// is false, where unregistered names are handled at delete time instead.
+func resolveDeleteTargets(repoBranches *internal.RepositoryBranches, gitBranches []string, args []string, useRegex bool, all bool) ([]string, error) {
 	if !useRegex {
 		return args, nil
 	}
@@ -139,6 +166,20 @@ func resolveDeleteTargets(repoBranches *internal.RepositoryBranches, args []stri
 			}
 		}
 	}
+	if all {
+		for _, name := range gitBranches {
+			if seen[name] {
+				continue
+			}
+			for _, re := range patterns {
+				if re.MatchString(name) {
+					seen[name] = true
+					targets = append(targets, name)
+					break
+				}
+			}
+		}
+	}
 	return targets, nil
 }
 
@@ -147,8 +188,14 @@ func executeDeleteBranch(git *internal.Git, repoBranches *internal.RepositoryBra
 
 	branch, ok := repoBranches.GetBranchByNameOrAlias(item)
 	if !ok {
-		logger.InfoF("Branch/Alias \"%v\" not found\n", item)
-		return
+		if !opts.All {
+			logger.InfoF("Branch/Alias \"%v\" not found\n", item)
+			return
+		}
+		// With --all, the item is treated as a raw git branch name. There is no
+		// registry entry to remove; the git delete below reports an error if no
+		// such branch exists.
+		branch = internal.Branch{Name: item}
 	}
 
 	// Delete worktree FIRST if needed (git won't let us delete a branch checked out in a worktree)
@@ -176,8 +223,13 @@ func executeDeleteBranch(git *internal.Git, repoBranches *internal.RepositoryBra
 		}
 
 		if err == nil || opts.IgnoreErrors {
+			// RemoveBranch is a no-op for unregistered branches (no matching entry).
 			repoBranches.RemoveBranch(branch)
-			logger.InfoF("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
+			if branch.Alias != "" {
+				logger.InfoF("Branch \"%v\" with alias \"%v\" was deleted\n", branch.Name, branch.Alias)
+			} else {
+				logger.InfoF("Branch \"%v\" was deleted\n", branch.Name)
+			}
 		}
 	}
 	if (err == nil || opts.IgnoreErrors) && (opts.Remote || opts.RemoteOnly) {
@@ -198,4 +250,5 @@ func init() {
 	deleteCmd.Flags().Bool("remote-only", false, "Deletes only the remote branch. Local branch and registry entry are not removed")
 	deleteCmd.Flags().BoolP("worktree", "w", false, "Also delete the associated worktree")
 	deleteCmd.Flags().BoolP("regex", "e", false, "Treat the arguments as regular expressions matched against branch names and aliases")
+	deleteCmd.Flags().BoolP("all", "a", false, "Also consider local git branches not registered with g, expanding the candidate list before searching/deleting")
 }
