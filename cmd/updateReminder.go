@@ -41,7 +41,7 @@ func checkUpdateReminder() {
 	if !isCheckIntervalElapsed() {
 		// Between checks — show stored reminder if an update was previously detected
 		if requiresUpdate == "true" {
-			logger.InfoF("\n\tUpdate available. Run 'g updateCheck' to upgrade.\n")
+			logger.InfoF("\n\tUpdate available. Run 'g upgrade' to update.\n")
 		}
 		return
 	}
@@ -65,7 +65,7 @@ func checkUpdateReminder() {
 			logger.Debugln("Failed to set requires_update:", err)
 		}
 		if requiresUpdate != "true" {
-			logger.InfoF("\n\tUpdate available: v%s (current: v%s). Run 'g updateCheck' to upgrade.\n", latestVersion, rootCmd.Version)
+			logger.InfoF("\n\tUpdate available: v%s (current: v%s). Run 'g upgrade' to update.\n", latestVersion, rootCmd.Version)
 		}
 	} else {
 		clearRequiresUpdate()
