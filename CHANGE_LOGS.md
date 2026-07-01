@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.5.1
+> rename updateCheck command to upgrade (#46)
+
 ### Version 3.5.0
 > add --all flag to `g list` and `g delete` (#45)
 
