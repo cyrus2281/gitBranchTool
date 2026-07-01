@@ -19,12 +19,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// updateCheckCmd represents the updateCheck command
-var updateCheckCmd = &cobra.Command{
-	Use:     "updateCheck",
+// upgradeCmd represents the upgrade command
+var upgradeCmd = &cobra.Command{
+	Use:     "upgrade",
 	Short:   "Checks if a newer version is available",
 	Long:    `Checks if a newer version is available. Asks to upgrade if available",`,
-	Aliases: []string{"update-check", "uc"},
+	Aliases: []string{"updateCheck", "update-check", "uc"},
 	Annotations: map[string]string{
 		manualAnnotation: `Check whether a newer version of the tool is available and optionally upgrade. Flag: -y/--yes-to-all to update without prompting.`,
 	},
@@ -39,8 +39,8 @@ var updateCheckCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(updateCheckCmd)
-	updateCheckCmd.Flags().BoolP("yes-to-all", "y", false, "Automatically update to the latest version")
+	rootCmd.AddCommand(upgradeCmd)
+	upgradeCmd.Flags().BoolP("yes-to-all", "y", false, "Automatically update to the latest version")
 }
 
 type Release struct {

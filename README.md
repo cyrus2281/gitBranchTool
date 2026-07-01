@@ -180,7 +180,7 @@ Available Commands:
   set              Set configuration options (Run `g set --help` for more information)
   switch           Switches to the branch with the given name or alias
   updateBranchNote Adds/updates the notes for a branch base on name/alias
-  updateCheck      Checks if a newer version is available
+  upgrade          Checks if a newer version is available
   worktree         Manage git worktrees (Run `g worktree --help` for more information)
 
 Flags:
@@ -352,7 +352,7 @@ g set local-prefix dev/
 - **Upgrade the tool to latest version**
 
 ```bash
-g uc -y
+g upgrade -y
 ```
 
 - **Create a worktree for an existing branch**

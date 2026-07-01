@@ -22,7 +22,7 @@ func TestBuildManualDefaultOnlyImportant(t *testing.T) {
 	}
 
 	// Non-important commands must not appear without --full.
-	for _, name := range []string{"addAlias", "rename", "removeEntry", "updateCheck"} {
+	for _, name := range []string{"addAlias", "rename", "removeEntry", "upgrade"} {
 		if strings.Contains(out, "## "+name) {
 			t.Errorf("default manual should not include non-important command %q", name)
 		}
