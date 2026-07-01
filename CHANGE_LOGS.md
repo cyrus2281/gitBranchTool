@@ -1,5 +1,8 @@
 # Version Change Logs
 
+### Version 3.5.2
+> strip worktree marker when parsing git branch output (#47)
+
 ### Version 3.5.1
 > rename updateCheck command to upgrade (#46)
 
