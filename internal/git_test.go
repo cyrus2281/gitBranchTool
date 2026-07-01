@@ -32,6 +32,28 @@ func TestParseBranchOutput_SingleBranchWithStar(t *testing.T) {
 	}
 }
 
+func TestParseBranchOutput_SingleBranchWithWorktreeMarker(t *testing.T) {
+	// `git branch` prefixes a branch checked out in a linked worktree with "+".
+	result := parseBranchOutput("+ claude/fervent-pike-66c45e")
+	if len(result) != 1 || result[0] != "claude/fervent-pike-66c45e" {
+		t.Errorf("expected [claude/fervent-pike-66c45e], got %v", result)
+	}
+}
+
+func TestParseBranchOutput_MixedMarkers(t *testing.T) {
+	input := "+ claude/fervent-pike-66c45e\n+ claude/reverent-turing-a6fb33\n* main\n  some/new/branch\n  wow"
+	result := parseBranchOutput(input)
+	expected := []string{"claude/fervent-pike-66c45e", "claude/reverent-turing-a6fb33", "main", "some/new/branch", "wow"}
+	if len(result) != len(expected) {
+		t.Fatalf("expected %d branches, got %d: %v", len(expected), len(result), result)
+	}
+	for i, b := range expected {
+		if result[i] != b {
+			t.Errorf("index %d: expected %q, got %q", i, b, result[i])
+		}
+	}
+}
+
 func TestParseBranchOutput_MultipleBranches(t *testing.T) {
 	input := "* main\n  feature-a\n  bugfix-1"
 	result := parseBranchOutput(input)

@@ -255,7 +255,8 @@ func (g *Git) GetBranches() ([]string, error) {
 }
 
 // parseBranchOutput parses the output of `git branch` into a list of branch names.
-// It strips the `*` marker from the current branch, trims whitespace,
+// It strips the leading marker git prepends to a branch (`*` for the current
+// branch, `+` for a branch checked out in a linked worktree), trims whitespace,
 // and filters out detached HEAD entries.
 func parseBranchOutput(output string) []string {
 	lines := strings.Split(output, "\n")
@@ -265,7 +266,7 @@ func parseBranchOutput(output string) []string {
 		if line == "" {
 			continue
 		}
-		if strings.HasPrefix(line, "*") {
+		if strings.HasPrefix(line, "*") || strings.HasPrefix(line, "+") {
 			line = strings.TrimSpace(line[1:])
 		}
 		// Filter out detached HEAD entries like "(HEAD detached at abc123)"
